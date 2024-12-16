@@ -25,20 +25,20 @@ public class PlayerAgent : Agent
         for (var i = 0; i < playgroundSize; i++)
         {
             var cell = playground.GetCellPiece(i);
-            sensor.AddObservation(cell ? (int)cell.Team + 1 : 0);
-            sensor.AddObservation(cell ? cell.Number + 1 : 0);
+            sensor.AddOneHotObservation(cell ? cell.Number : -1, 7);
+            sensor.AddObservation(cell && cell.Team == Team.Red);
         }
 
         var playerPieceCount = player.GetPieceCount();
         for (var i = 0; i < playerPieceCount; i++)
         {
-            sensor.AddObservation(player.HasPiece(i) ? 1 : 0);
+            sensor.AddObservation(player.HasPiece(i));
         }
 
         var rivalPieceCount = rivalPlayer.GetPieceCount();
         for (var i = 0; i < rivalPieceCount; i++)
         {
-            sensor.AddObservation(rivalPlayer.HasPiece(i) ? 1 : 0);
+            sensor.AddObservation(rivalPlayer.HasPiece(i));
         }
     }
 

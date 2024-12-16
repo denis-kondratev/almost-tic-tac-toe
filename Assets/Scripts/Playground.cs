@@ -1,11 +1,15 @@
 using System;
 using UnityEngine;
 using UnityEngine.Assertions;
-using Random = UnityEngine.Random;
 
 public class Playground : MonoBehaviour
 {
     [SerializeField] private GameCell[] cells;
+    [SerializeField] private MeshRenderer blueIndicator;
+    [SerializeField] private MeshRenderer redIndicator;
+    [SerializeField] private Material invalidMaterial;
+    [SerializeField] private Material winMaterial;
+    [SerializeField] private Material drawMaterial;
 
     public PlaygroundState State { get; private set; }
     
@@ -20,6 +24,8 @@ public class Playground : MonoBehaviour
     {
         State = PlaygroundState.Playing;
         Array.ForEach(cells, cell => cell.Reset());
+        blueIndicator.gameObject.SetActive(false);
+        redIndicator.gameObject.SetActive(false);
     }
 
     public GamePiece GetCellPiece(int cellIndex)
@@ -53,6 +59,10 @@ public class Playground : MonoBehaviour
             Team.Red => PlaygroundState.RedMadeInvalidMove,
             _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
         };
+        
+        var indicator = GetIndicator(team);
+        indicator.gameObject.SetActive(true);
+        indicator.GetComponent<MeshRenderer>().material = invalidMaterial;
     }
 
     public void MakeMove(int cellIndex, GamePiece piece)
@@ -71,13 +81,41 @@ public class Playground : MonoBehaviour
 
         if (CheckWin(cellIndex, piece.Team))
         {
-            State = piece.Team switch
-            {
-                Team.Blue => PlaygroundState.BlueWins,
-                Team.Red => PlaygroundState.RedWins,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            Win(piece.Team);
         }
+
+        if (CheckDraw())
+        {
+            Draw();
+        }
+    }
+
+    private bool CheckDraw()
+    {
+        return false;
+    }
+
+    private void Win(Team team)
+    {
+        State = team switch
+        {
+            Team.Blue => PlaygroundState.BlueWins,
+            Team.Red => PlaygroundState.RedWins,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        
+        var indicator = GetIndicator(team);
+        indicator.gameObject.SetActive(true);
+        indicator.GetComponent<MeshRenderer>().material = winMaterial;
+    }
+
+    private void Draw()
+    {
+        State = PlaygroundState.Draw;
+        blueIndicator.gameObject.SetActive(true);
+        blueIndicator.GetComponent<MeshRenderer>().material = drawMaterial;
+        redIndicator.gameObject.SetActive(true);
+        redIndicator.GetComponent<MeshRenderer>().material = drawMaterial;
     }
 
     private bool CheckWin(int cellIndex, Team team)
@@ -116,5 +154,15 @@ public class Playground : MonoBehaviour
     public void EndGame()
     {
         State = PlaygroundState.None;
+    }
+
+    private MeshRenderer GetIndicator(Team team)
+    {
+        return team switch
+        {
+            Team.Blue => blueIndicator,
+            Team.Red => redIndicator,
+            _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
+        };
     }
 }
