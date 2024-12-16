@@ -5,5 +5,6 @@ public enum PlaygroundState
     BlueWins = 2,
     RedWins = 3,
     BlueMadeInvalidMove = 4,
-    RedMadeInvalidMove = 5
+    RedMadeInvalidMove = 5,
+    Draw = 6
 }

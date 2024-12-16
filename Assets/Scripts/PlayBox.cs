@@ -45,6 +45,9 @@ public class PlayBox : MonoBehaviour
             case PlaygroundState.RedMadeInvalidMove:
                 OnInvalidMove(redPlayer, bluePlayer);
                 break;
+            case PlaygroundState.Draw:
+                OnDraw();
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -72,18 +75,28 @@ public class PlayBox : MonoBehaviour
         penalizedPlayer.AddReward(-10);
         penalizedPlayer.EndEpisode();
         anotherPlayer.EndEpisode();
-        playground.EndGame();
         Academy.Instance.EnvironmentStep();
+        EndGame();
     }
 
     private void OnWin(PlayerAgent winner, PlayerAgent looser)
     {
         winner.AddReward(1);
-        looser.AddReward(-1);
         winner.EndEpisode();
+        looser.AddReward(-1);
         looser.EndEpisode();
-        playground.EndGame();
         Academy.Instance.EnvironmentStep();
+        EndGame();
+    }
+
+    private void OnDraw()
+    {
+        bluePlayer.AddReward(0.5f);
+        bluePlayer.EndEpisode();
+        redPlayer.AddReward(0.5f);
+        redPlayer.EndEpisode();
+        Academy.Instance.EnvironmentStep();
+        EndGame();
     }
 
     private void StartGame()
@@ -102,5 +115,11 @@ public class PlayBox : MonoBehaviour
             Team.Red => redPlayer,
             _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
         };
+    }
+
+    private void EndGame()
+    {
+        playground.EndGame();
+        _nextStep += stepDuration;
     }
 }
