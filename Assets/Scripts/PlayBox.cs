@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using Unity.MLAgents;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -72,7 +71,7 @@ public class PlayBox : MonoBehaviour
 
     private void OnInvalidMove(PlayerAgent penalizedPlayer, PlayerAgent anotherPlayer)
     {
-        penalizedPlayer.AddReward(-10);
+        penalizedPlayer.AddReward(-10f);
         penalizedPlayer.EndEpisode();
         anotherPlayer.EndEpisode();
         Academy.Instance.EnvironmentStep();
@@ -81,9 +80,9 @@ public class PlayBox : MonoBehaviour
 
     private void OnWin(PlayerAgent winner, PlayerAgent looser)
     {
-        winner.AddReward(1);
+        winner.AddReward(10);
         winner.EndEpisode();
-        looser.AddReward(-1);
+        looser.AddReward(-1f);
         looser.EndEpisode();
         Academy.Instance.EnvironmentStep();
         EndGame();
@@ -91,9 +90,9 @@ public class PlayBox : MonoBehaviour
 
     private void OnDraw()
     {
-        bluePlayer.AddReward(0.5f);
+        bluePlayer.AddReward(5f);
         bluePlayer.EndEpisode();
-        redPlayer.AddReward(0.5f);
+        redPlayer.AddReward(5f);
         redPlayer.EndEpisode();
         Academy.Instance.EnvironmentStep();
         EndGame();

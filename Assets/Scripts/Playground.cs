@@ -65,18 +65,18 @@ public class Playground : MonoBehaviour
         indicator.GetComponent<MeshRenderer>().material = invalidMaterial;
     }
 
-    public void MakeMove(int cellIndex, GamePiece piece)
+    public bool MakeMove(int cellIndex, GamePiece piece)
     {
         if (cellIndex < 0 || cellIndex >= cells.Length)
         {
             MakeInvalidMove(piece.Team);
-            return;
+            return false;
         }
 
         if (!cells[cellIndex].MovePiece(piece))
         {
             MakeInvalidMove(piece.Team);
-            return;
+            return false;
         }
 
         if (CheckWin(cellIndex, piece.Team))
@@ -88,6 +88,21 @@ public class Playground : MonoBehaviour
         {
             Draw();
         }
+        
+        return true;
+    }
+
+    public bool CanMakeAnyMove(GamePiece piece)
+    {
+        foreach (var cell in cells)
+        {
+            if (cell.CanMove(piece))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private bool CheckDraw()
@@ -164,5 +179,14 @@ public class Playground : MonoBehaviour
             Team.Red => redIndicator,
             _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
         };
+    }
+
+    public void SetDraw()
+    {
+        State = PlaygroundState.Draw;
+        blueIndicator.gameObject.SetActive(true);
+        blueIndicator.GetComponent<MeshRenderer>().material = drawMaterial;
+        redIndicator.gameObject.SetActive(true);
+        redIndicator.GetComponent<MeshRenderer>().material = drawMaterial;
     }
 }

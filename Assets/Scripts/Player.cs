@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -34,22 +35,35 @@ public class Player : MonoBehaviour
         return _hasPiece[pieceSize];
     }
 
-    public void MakeMove(int cellIndex, int pieceNumber)
+    public bool MakeMove(int cellIndex, int pieceNumber)
     {
         if (pieceNumber < 0 || pieceNumber > pieces.Length)
         {
             playground.MakeInvalidMove(Team);
-            return;
+            return false;
         }
 
         if (!_hasPiece[pieceNumber])
         {
             playground.MakeInvalidMove(Team);
-            return;
+            return false;
         }
         
         _hasPiece[pieceNumber] = false;
-        playground.MakeMove(cellIndex, pieces[pieceNumber]);
+        return playground.MakeMove(cellIndex, pieces[pieceNumber]);
+    }
+
+    public bool CanMakeAnyMove()
+    {
+        for (var i = 0; i < pieces.Length; i++)
+        {
+            if (_hasPiece[i] && playground.CanMakeAnyMove(pieces[i]))
+            {
+                return true;
+            }
+        }
+
+        return true;
     }
 
     private void CheckPlayer()
@@ -61,5 +75,10 @@ public class Player : MonoBehaviour
                 throw new Exception($"Invalid piece size: {pieces[i].Number}. Player: {gameObject.name}.");
             }
         }
+    }
+
+    public int GetAvailablePieceCount()
+    {
+        return _hasPiece.Count(x => x);
     }
 }
