@@ -13,6 +13,12 @@ public class PlayerAgent : Agent
     
     public void MakeMove()
     {
+        if (!player.CanMakeAnyMove())
+        {
+            playground.SetDraw();
+            return;
+        }
+        
         IsWaitingAction = true;
         RequestDecision();
         RequestAction();
@@ -46,12 +52,21 @@ public class PlayerAgent : Agent
     {
         var pieceSize = actions.DiscreteActions[0];
         var cellIndex = actions.DiscreteActions[1];
-        player.MakeMove(cellIndex, pieceSize);
+        if (player.MakeMove(cellIndex, pieceSize))
+        {
+            AddReward(0.1f);
+        }
         IsWaitingAction = false;
     }
 
     public void Reset()
     {
         player.Reset();
+    }
+
+    public int GetAvailablePieceCount()
+    {
+        return player.GetAvailablePieceCount();
+        
     }
 }
