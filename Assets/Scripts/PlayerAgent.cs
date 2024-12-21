@@ -21,8 +21,7 @@ public class PlayerAgent : Agent
         
         IsWaitingAction = true;
         RequestDecision();
-        RequestAction();
-        Academy.Instance.EnvironmentStep();
+        //Academy.Instance.EnvironmentStep();
     }
     
     public override void CollectObservations(VectorSensor sensor)
@@ -50,12 +49,15 @@ public class PlayerAgent : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        var pieceSize = actions.DiscreteActions[0];
+        var pieceNumber = actions.DiscreteActions[0];
         var cellIndex = actions.DiscreteActions[1];
-        if (player.MakeMove(cellIndex, pieceSize))
+        
+        if (!player.CanMove(cellIndex, pieceNumber))
         {
-            AddReward(0.1f);
+            pieceNumber = player.GetMinPiece();
         }
+
+        player.MakeMove(cellIndex, pieceNumber);
         IsWaitingAction = false;
     }
 
@@ -64,9 +66,35 @@ public class PlayerAgent : Agent
         player.Reset();
     }
 
-    public int GetAvailablePieceCount()
+    public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
-        return player.GetAvailablePieceCount();
+        var hasAction = false;
         
+        for (var piece = 0; piece < 7; piece++)
+        {
+            var hasPiece = player.HasPiece(piece);
+            hasAction = hasAction || hasPiece;
+            actionMask.SetActionEnabled(0, piece, hasPiece);
+        }
+        
+        if (!hasAction)
+        {
+            Debug.LogError("No move!");
+        }
+
+        hasAction = false;
+        var minPiece = player.GetMinPiece();
+        
+        for (var cell = 0; cell < 9; cell++)
+        {
+            var canMove = playground.CanMove(cell, minPiece);
+            hasAction = hasAction || canMove;
+            actionMask.SetActionEnabled(1, cell, canMove);
+        }
+        
+        if (!hasAction)
+        {
+            Debug.LogError("No move!");
+        }
     }
 }
