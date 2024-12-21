@@ -1,7 +1,5 @@
 using System;
-using Unity.MLAgents;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class PlayBox : MonoBehaviour
 {
@@ -74,27 +72,27 @@ public class PlayBox : MonoBehaviour
         penalizedPlayer.AddReward(-10f);
         penalizedPlayer.EndEpisode();
         anotherPlayer.EndEpisode();
-        Academy.Instance.EnvironmentStep();
+        //Academy.Instance.EnvironmentStep();
         EndGame();
     }
 
     private void OnWin(PlayerAgent winner, PlayerAgent looser)
     {
-        winner.AddReward(10);
-        winner.EndEpisode();
+        winner.AddReward(1f);
         looser.AddReward(-1f);
+        winner.EndEpisode();
         looser.EndEpisode();
-        Academy.Instance.EnvironmentStep();
+        //Academy.Instance.EnvironmentStep();
         EndGame();
     }
 
     private void OnDraw()
     {
-        bluePlayer.AddReward(5f);
+        bluePlayer.AddReward(0.2f);
+        redPlayer.AddReward(0.2f);
         bluePlayer.EndEpisode();
-        redPlayer.AddReward(5f);
         redPlayer.EndEpisode();
-        Academy.Instance.EnvironmentStep();
+        //Academy.Instance.EnvironmentStep();
         EndGame();
     }
 
@@ -103,7 +101,7 @@ public class PlayBox : MonoBehaviour
         playground.StartGame();
         bluePlayer.Reset();
         redPlayer.Reset();
-        _turnTeam = Random.Range(0, 2) == 0 ? Team.Blue : Team.Red;
+        _turnTeam = Team.Red;
     }
 
     private PlayerAgent GetPlayer(Team team)

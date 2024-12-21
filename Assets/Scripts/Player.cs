@@ -63,7 +63,7 @@ public class Player : MonoBehaviour
             }
         }
 
-        return true;
+        return false;
     }
 
     private void CheckPlayer()
@@ -80,5 +80,28 @@ public class Player : MonoBehaviour
     public int GetAvailablePieceCount()
     {
         return _hasPiece.Count(x => x);
+    }
+
+    public bool CanMove(int cellIndex, int pieceNumber)
+    {
+        if (pieceNumber < 0 || pieceNumber > pieces.Length || !_hasPiece[pieceNumber])
+        {
+            return false;
+        }
+        
+        return playground.CanMove(cellIndex, pieceNumber);
+    }
+
+    public int GetMinPiece()
+    {   
+        for (var i = 0; i < _hasPiece.Length; i++)
+        {
+            if (_hasPiece[i])
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 }

@@ -1,4 +1,3 @@
-using Unity.MLAgents;
 using UnityEngine;
 
 public static class Bootstrap
@@ -7,6 +6,6 @@ public static class Bootstrap
     public static void Run()
     {
         Application.targetFrameRate = 60;
-        Academy.Instance.AutomaticSteppingEnabled = false;
+        //Academy.Instance.AutomaticSteppingEnabled = false;
     }
 }

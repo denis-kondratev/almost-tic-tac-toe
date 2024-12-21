@@ -39,7 +39,7 @@ public class Playground : MonoBehaviour
         return cells[cellIndex].GetCurrentPiece();
     }
 
-    public bool CanMove(int cellIndex, int pieceSize)
+    public bool CanMove(int cellIndex, int pieceNumber)
     {
         if (cellIndex < 0 || cellIndex >= cells.Length)
         {
@@ -48,7 +48,7 @@ public class Playground : MonoBehaviour
         }
         
         var currentPiece = cells[cellIndex].GetCurrentPiece();
-        return currentPiece == null || currentPiece.Number < pieceSize;
+        return currentPiece == null || currentPiece.Number > pieceNumber;
     }
 
     public void MakeInvalidMove(Team team)
