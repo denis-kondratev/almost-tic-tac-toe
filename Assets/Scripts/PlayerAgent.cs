@@ -15,7 +15,7 @@ public class PlayerAgent : Agent
     {
         if (!player.CanMakeAnyMove())
         {
-            playground.SetDraw();
+            //playground.SetDraw();
             return;
         }
         
@@ -63,7 +63,7 @@ public class PlayerAgent : Agent
 
     public void Reset()
     {
-        player.Reset();
+        player.ResetPlayer();
     }
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)

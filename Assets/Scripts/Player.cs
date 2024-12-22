@@ -8,15 +8,24 @@ public class Player : MonoBehaviour
     [field: SerializeField] public Team Team { get; private set; }
     [SerializeField] private GamePiece[] pieces;
     [SerializeField] private Playground playground;
+
+    public event Action InvalidMove;
+    public event Action Win;
+    public event Action Draw;
+    public event Action Lose;
+    public event Action Turn;
+    public event Action Reset;
     
     private bool[] _hasPiece;
+    private bool _isWaitingForMove;
     
-    public void Reset()
+    public void ResetPlayer()
     {
         CheckPlayer();
         Array.ForEach(pieces, x => x.Reset());
         _hasPiece ??= new bool[pieces.Length];
         Array.Fill(_hasPiece, true);
+        Reset?.Invoke();
     }
     
     public int GetPieceCount()
@@ -37,15 +46,17 @@ public class Player : MonoBehaviour
 
     public bool MakeMove(int cellIndex, int pieceNumber)
     {
+        _isWaitingForMove = false;
+        
         if (pieceNumber < 0 || pieceNumber > pieces.Length)
         {
-            playground.MakeInvalidMove(Team);
+            playground.MakeInvalidMove();
             return false;
         }
 
         if (!_hasPiece[pieceNumber])
         {
-            playground.MakeInvalidMove(Team);
+            playground.MakeInvalidMove();
             return false;
         }
         
@@ -103,5 +114,36 @@ public class Player : MonoBehaviour
         }
 
         return -1;
+    }
+
+    public void OnInvalidMove()
+    {
+        InvalidMove?.Invoke();
+    }
+
+    public void OnDraw()
+    {
+        Draw?.Invoke();
+    }
+
+    public void OnWin()
+    {
+        Win?.Invoke();
+    }
+
+    public void OnLose()
+    {
+        Lose?.Invoke();
+    }
+
+    public bool IsWaitingForMove()
+    {
+        return _isWaitingForMove;
+    }
+
+    public void NextTurn()
+    {
+        _isWaitingForMove = true;
+        Turn?.Invoke();
     }
 }
