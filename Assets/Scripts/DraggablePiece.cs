@@ -10,6 +10,7 @@ public class DraggablePiece : MonoBehaviour
     [SerializeField] private GamePiece piece;
     [SerializeField] private float moveSpeed = 10f;
     [SerializeField] private LayerMask cellMask;
+    [SerializeField] private Player player;
     private Camera _mainCamera;
     private Vector3 _offset;
     private Vector3 _targetPosition;
@@ -23,7 +24,10 @@ public class DraggablePiece : MonoBehaviour
 
     private void OnMouseDown()
     {
-        StartDragging();
+        if (player.IsWaitingForMove)
+        {
+            StartDragging();
+        }
     }
 
     private void StartDragging()
@@ -80,22 +84,24 @@ public class DraggablePiece : MonoBehaviour
     {
         if (_state == State.Dragging)
         {
-            StartMovingPiece();
+            EndDragging();
         }
     }
 
-    private void StartMovingPiece()
+    private void EndDragging()
     {
         _state = State.Moving;
         animator.SetBool(IsDragging, false);
 
-        if (!TryFindCell(out var cell))
+        if (player.IsWaitingForMove 
+            && TryFindCell(out var cell)
+            && player.TryMakeMove(cell, piece))
         {
-            _targetPosition = _startDragPosition;
+            _targetPosition = cell.MountPosition;
             return;
         }
 
-        _targetPosition = cell.MountPosition;
+        _targetPosition = _startDragPosition;
     }
 
     private enum State

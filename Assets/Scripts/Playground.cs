@@ -57,7 +57,7 @@ public class Playground : MonoBehaviour
             return false;
         }
 
-        if (!cells[cellIndex].MovePiece(piece))
+        if (!cells[cellIndex].TryMovePiece(piece))
         {
             MakeInvalidMove();
             return false;
@@ -120,5 +120,22 @@ public class Playground : MonoBehaviour
     private void GotoState(PlaygroundState state)
     {
         State = state;
+    }
+
+    public bool TryMakeMove(GameCell cell, GamePiece piece)
+    {
+        if (State is not PlaygroundState.Playing || !cell.TryMovePiece(piece))
+        {
+            return false;
+        }
+        
+        var cellIndex = Array.IndexOf(cells, cell);
+            
+        if (CheckWin(cellIndex, piece.Team))
+        {
+            GotoState(PlaygroundState.HasWin);
+        }
+
+        return true;
     }
 }

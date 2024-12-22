@@ -17,16 +17,15 @@ public class GameCell : MonoBehaviour
         return !_currentPiece || _currentPiece.Number > piece.Number;
     }
 
-    public bool MovePiece(GamePiece piece)
+    public bool TryMovePiece(GamePiece piece)
     {
-        if (!CanMove(piece))
+        if (CanMove(piece))
         {
-            return false;
+            _currentPiece = piece;
+            return true;
         }
-        
-        piece.MoveTo(pieceMount);
-        _currentPiece = piece;
-        return true;
+
+        return false;
     }
 
     public bool IsTeam(Team team)
