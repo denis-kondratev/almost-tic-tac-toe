@@ -5,11 +5,6 @@ using UnityEngine.Assertions;
 public class Playground : MonoBehaviour
 {
     [SerializeField] private GameCell[] cells;
-    [SerializeField] private MeshRenderer blueIndicator;
-    [SerializeField] private MeshRenderer redIndicator;
-    [SerializeField] private Material invalidMaterial;
-    [SerializeField] private Material winMaterial;
-    [SerializeField] private Material drawMaterial;
 
     public PlaygroundState State { get; private set; }
     
@@ -22,10 +17,8 @@ public class Playground : MonoBehaviour
 
     public void StartGame()
     {
-        State = PlaygroundState.Playing;
         Array.ForEach(cells, cell => cell.Reset());
-        blueIndicator.gameObject.SetActive(false);
-        redIndicator.gameObject.SetActive(false);
+        GotoState(PlaygroundState.Playing);
     }
 
     public GamePiece GetCellPiece(int cellIndex)
@@ -51,42 +44,28 @@ public class Playground : MonoBehaviour
         return currentPiece == null || currentPiece.Number > pieceNumber;
     }
 
-    public void MakeInvalidMove(Team team)
+    public void MakeInvalidMove()
     {
-        State = team switch
-        {
-            Team.Blue => PlaygroundState.BlueMadeInvalidMove,
-            Team.Red => PlaygroundState.RedMadeInvalidMove,
-            _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
-        };
-        
-        var indicator = GetIndicator(team);
-        indicator.gameObject.SetActive(true);
-        indicator.GetComponent<MeshRenderer>().material = invalidMaterial;
+        GotoState(PlaygroundState.InvalidMove);
     }
 
     public bool MakeMove(int cellIndex, GamePiece piece)
     {
         if (cellIndex < 0 || cellIndex >= cells.Length)
         {
-            MakeInvalidMove(piece.Team);
+            MakeInvalidMove();
             return false;
         }
 
         if (!cells[cellIndex].MovePiece(piece))
         {
-            MakeInvalidMove(piece.Team);
+            MakeInvalidMove();
             return false;
         }
 
         if (CheckWin(cellIndex, piece.Team))
         {
-            Win(piece.Team);
-        }
-
-        if (CheckDraw())
-        {
-            Draw();
+            GotoState(PlaygroundState.HasWin);
         }
         
         return true;
@@ -103,34 +82,6 @@ public class Playground : MonoBehaviour
         }
 
         return false;
-    }
-
-    private bool CheckDraw()
-    {
-        return false;
-    }
-
-    private void Win(Team team)
-    {
-        State = team switch
-        {
-            Team.Blue => PlaygroundState.BlueWins,
-            Team.Red => PlaygroundState.RedWins,
-            _ => throw new ArgumentOutOfRangeException()
-        };
-        
-        var indicator = GetIndicator(team);
-        indicator.gameObject.SetActive(true);
-        indicator.GetComponent<MeshRenderer>().material = winMaterial;
-    }
-
-    private void Draw()
-    {
-        State = PlaygroundState.Draw;
-        blueIndicator.gameObject.SetActive(true);
-        blueIndicator.GetComponent<MeshRenderer>().material = drawMaterial;
-        redIndicator.gameObject.SetActive(true);
-        redIndicator.GetComponent<MeshRenderer>().material = drawMaterial;
     }
 
     private bool CheckWin(int cellIndex, Team team)
@@ -165,28 +116,9 @@ public class Playground : MonoBehaviour
 
         return false;
     }
-
-    public void EndGame()
+    
+    private void GotoState(PlaygroundState state)
     {
-        State = PlaygroundState.None;
-    }
-
-    private MeshRenderer GetIndicator(Team team)
-    {
-        return team switch
-        {
-            Team.Blue => blueIndicator,
-            Team.Red => redIndicator,
-            _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
-        };
-    }
-
-    public void SetDraw()
-    {
-        State = PlaygroundState.Draw;
-        blueIndicator.gameObject.SetActive(true);
-        blueIndicator.GetComponent<MeshRenderer>().material = drawMaterial;
-        redIndicator.gameObject.SetActive(true);
-        redIndicator.GetComponent<MeshRenderer>().material = drawMaterial;
+        State = state;
     }
 }
