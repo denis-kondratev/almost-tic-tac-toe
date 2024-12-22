@@ -24,7 +24,7 @@ public class DraggablePiece : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (player.IsWaitingForMove)
+        if (player.State is PlayerState.WaitingForMove)
         {
             StartDragging();
         }
@@ -93,7 +93,7 @@ public class DraggablePiece : MonoBehaviour
         _state = State.Moving;
         animator.SetBool(IsDragging, false);
 
-        if (player.IsWaitingForMove 
+        if (player.State is PlayerState.WaitingForMove 
             && TryFindCell(out var cell)
             && player.TryMakeMove(cell, piece))
         {

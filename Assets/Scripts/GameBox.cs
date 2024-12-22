@@ -86,7 +86,7 @@ public class GameBox : MonoBehaviour
 
     private void WaitForMove(Player player)
     {
-        if (!player.IsWaitingForMove)
+        if (player.State is not PlayerState.WaitingForMove)
         {
             OnPlayerMoved(player.Team);
         }
@@ -128,7 +128,7 @@ public class GameBox : MonoBehaviour
     {
         if (player.CanMakeAnyMove())
         {
-            player.NextTurn();
+            player.StartTurn();
             var nextState = player.Team == Team.Blue ? State.WaitForBlueMove : State.WaitForRedMove;
             GotoState(nextState);
         }
