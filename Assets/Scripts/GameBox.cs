@@ -18,7 +18,7 @@ public class GameBox : MonoBehaviour
     
     private void Update()
     {
-        if (_nextStepTime > Time.time)
+        if (_nextStepTime < Time.time)
         {
             _nextStepTime += stepDuration;
             NextStep();
@@ -100,7 +100,7 @@ public class GameBox : MonoBehaviour
 
     private State GetNextState(PlaygroundState playgroundState, Team team)
     {
-        return playground.State switch
+        return playgroundState switch
         {
             PlaygroundState.Playing => team switch
             {
