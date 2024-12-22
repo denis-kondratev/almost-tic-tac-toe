@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class DraggablePiece : MonoBehaviour
@@ -6,30 +7,66 @@ public class DraggablePiece : MonoBehaviour
     [SerializeField] private Transform pieceTransform;
     [SerializeField] private Animator animator;
     [SerializeField] private LayerMask tableMask;
+    [SerializeField] private GamePiece piece;
+    [SerializeField] private float moveSpeed = 10f;
+    [SerializeField] private LayerMask cellMask;
     private Camera _mainCamera;
     private Vector3 _offset;
-    private bool _isDragging;
+    private Vector3 _targetPosition;
+    private State _state;
+    private Vector3 _startDragPosition;
 
-    void Start()
+    private void Start()
     {
         _mainCamera = Camera.main;
     }
 
-    void OnMouseDown()
+    private void OnMouseDown()
     {
-        Ray ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
+        StartDragging();
+    }
+
+    private void StartDragging()
+    {
+        var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, tableMask))
         {
             _offset = pieceTransform.position - hit.point;
-            _isDragging = true;
+            _state = State.Dragging;
             animator.SetBool(IsDragging, true);
+            _startDragPosition = pieceTransform.position;
         }
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
-        if (!_isDragging) return;
+        switch (_state)
+        {
+            case State.Idle:
+                break;
+            case State.Moving:
+                MovePiece(Time.deltaTime * moveSpeed);
+                break;
+            case State.Dragging:
+                DragPiece();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private void MovePiece(float deltaTime)
+    {
+        pieceTransform.position = Vector3.MoveTowards(pieceTransform.position, _targetPosition, deltaTime);
         
+        if (pieceTransform.position == _targetPosition)
+        {
+            _state = State.Idle;
+        }
+    }
+
+    private void DragPiece()
+    {
         Ray ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, tableMask))
         {
@@ -38,10 +75,47 @@ public class DraggablePiece : MonoBehaviour
             pieceTransform.position = targetPosition;
         }
     }
-    
+
     void OnMouseUp()
     {
-        _isDragging = false;
+        if (_state == State.Dragging)
+        {
+            StartMovingPiece();
+        }
+    }
+
+    private void StartMovingPiece()
+    {
+        _state = State.Moving;
         animator.SetBool(IsDragging, false);
+
+        if (!TryFindCell(out var cell))
+        {
+            _targetPosition = _startDragPosition;
+            return;
+        }
+
+        _targetPosition = cell.MountPosition;
+    }
+
+    private enum State
+    {
+        Idle,
+        Moving,
+        Dragging
+    }
+
+    private bool TryFindCell(out GameCell cell)
+    {
+        var ray = new Ray(pieceTransform.position + Vector3.up * 2, Vector3.down);
+        
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, cellMask))
+        {
+            cell = hit.collider.GetComponent<GameCell>();
+            return true;
+        }
+
+        cell = null;
+        return false;
     }
 }

@@ -54,6 +54,11 @@ MonoBehaviour:
   tableMask:
     serializedVersion: 2
     m_Bits: 8
+  piece: {fileID: 5586544115434785189}
+  moveSpeed: 25
+  cellMask:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!114 &3293280456666315475
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,10 +1,10 @@
 using UnityEngine;
-using UnityEngine.Assertions;
 
 public class GameCell : MonoBehaviour
 {
     [SerializeField] private Transform pieceMount;
     
+    public Vector3 MountPosition => pieceMount.position;
     private GamePiece _currentPiece;
 
     public GamePiece GetCurrentPiece()

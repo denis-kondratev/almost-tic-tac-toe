@@ -5,7 +5,7 @@ public class GamePiece : MonoBehaviour
     [Range(0, 6)]
     [field: SerializeField] public int Number { get; private set; }
     [field: SerializeField] public Team Team { get; private set; }
-    
+
     private Vector3 _initialPosition;
 
     private void Awake()
