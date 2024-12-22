@@ -1,33 +1,38 @@
 using System;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 public class Player : MonoBehaviour
 { 
     [field: SerializeField] public Team Team { get; private set; }
     [SerializeField] private GamePiece[] pieces;
     [SerializeField] private Playground playground;
-
-    public event Action InvalidMove;
-    public event Action Win;
-    public event Action Draw;
-    public event Action Lose;
-    public event Action Turn;
-    public event Action Reset;
-    public event Action Moved;
     
     private bool[] _hasPiece;
+
+    private PlayerState _state;
+
+    public PlayerState State
+    {
+        get => _state;
+        private set
+        {
+            if (_state != value)
+            {
+                _state = value;
+                StateChanged?.Invoke(value);
+            }
+        }
+    }
     
-    public bool IsWaitingForMove {get; private set;}
+    public event Action<PlayerState> StateChanged; 
     
     public void ResetPlayer()
     {
-        CheckPlayer();
+        VerifyPlayer();
         Array.ForEach(pieces, x => x.Reset());
         _hasPiece ??= new bool[pieces.Length];
         Array.Fill(_hasPiece, true);
-        Reset?.Invoke();
+        State = PlayerState.Idle;
     }
     
     public int GetPieceCount()
@@ -35,35 +40,15 @@ public class Player : MonoBehaviour
         return pieces.Length;
     }
     
-    public bool HasPiece(int pieceSize)
+    public bool HasPiece(int piece)
     {
-        if (pieceSize < 0 || pieceSize > pieces.Length)
+        if (piece < 0 || piece > pieces.Length)
         {
-            Assert.IsTrue(false, $"Invalid piece size. Value: {pieceSize}.");
+            Debug.LogError($"Invalid piece. Value: {piece}.");
             return false;
         }
         
-        return _hasPiece[pieceSize];
-    }
-
-    public bool MakeMove(int cellIndex, int pieceNumber)
-    {
-        IsWaitingForMove = false;
-        
-        if (pieceNumber < 0 || pieceNumber > pieces.Length)
-        {
-            playground.MakeInvalidMove();
-            return false;
-        }
-
-        if (!_hasPiece[pieceNumber])
-        {
-            playground.MakeInvalidMove();
-            return false;
-        }
-        
-        _hasPiece[pieceNumber] = false;
-        return playground.MakeMove(cellIndex, pieces[pieceNumber]);
+        return _hasPiece[piece];
     }
 
     public bool CanMakeAnyMove()
@@ -79,7 +64,7 @@ public class Player : MonoBehaviour
         return false;
     }
 
-    private void CheckPlayer()
+    private void VerifyPlayer()
     {
         for (var i = 0; i < pieces.Length; i++)
         {
@@ -90,19 +75,14 @@ public class Player : MonoBehaviour
         }
     }
 
-    public int GetAvailablePieceCount()
+    public bool CanMove(int cell, int piece)
     {
-        return _hasPiece.Count(x => x);
-    }
-
-    public bool CanMove(int cellIndex, int pieceNumber)
-    {
-        if (pieceNumber < 0 || pieceNumber > pieces.Length || !_hasPiece[pieceNumber])
+        if (piece < 0 || piece > pieces.Length || !_hasPiece[piece])
         {
             return false;
         }
         
-        return playground.CanMove(cellIndex, pieceNumber);
+        return playground.CanMove(cell, piece);
     }
 
     public int GetMinPiece()
@@ -118,48 +98,40 @@ public class Player : MonoBehaviour
         return -1;
     }
 
-    public void OnInvalidMove()
-    {
-        InvalidMove?.Invoke();
-    }
-
-    public void OnDraw()
-    {
-        Draw?.Invoke();
-    }
-
-    public void OnWin()
-    {
-        Win?.Invoke();
-    }
-
-    public void OnLose()
-    {
-        Lose?.Invoke();
-    }
-
-    public void NextTurn()
-    {
-        IsWaitingForMove = true;
-        Turn?.Invoke();
-    }
-
     public bool TryMakeMove(GameCell cell, GamePiece piece)
     {
-        if (_hasPiece[piece.Number] && playground.TryMakeMove(cell, piece))
+        if (State is PlayerState.WaitingForMove && _hasPiece[piece.Number] && playground.TryMakeMove(cell, piece))
         {
             _hasPiece[piece.Number] = false;
-            IsWaitingForMove = false;
-            EndTurn();
+            State = PlayerState.Idle;
             return true;
         }
         
         return false;
     }
-    
-    private void EndTurn()
+
+    public void OnInvalidMove()
     {
-        IsWaitingForMove = false;
-        Moved?.Invoke();
+        State = PlayerState.Invalid;
+    }
+
+    public void OnDraw()
+    {
+        State = PlayerState.Draw;
+    }
+
+    public void OnWin()
+    {
+        State = PlayerState.Win;
+    }
+
+    public void OnLose()
+    {
+        State = PlayerState.Lose;
+    }
+
+    public void StartTurn()
+    {
+        State = PlayerState.WaitingForMove;
     }
 }

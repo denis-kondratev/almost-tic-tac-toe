@@ -57,7 +57,7 @@ public class PlayerAgent : Agent
             pieceNumber = player.GetMinPiece();
         }
 
-        player.MakeMove(cellIndex, pieceNumber);
+        //player.MakeMove(cellIndex, pieceNumber);
         IsWaitingAction = false;
     }
 
