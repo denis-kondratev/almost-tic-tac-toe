@@ -86,7 +86,7 @@ public class GameBox : MonoBehaviour
 
     private void WaitForMove(Player player)
     {
-        if (!player.IsWaitingForMove())
+        if (!player.IsWaitingForMove)
         {
             OnPlayerMoved(player.Team);
         }

@@ -15,9 +15,11 @@ public class Player : MonoBehaviour
     public event Action Lose;
     public event Action Turn;
     public event Action Reset;
+    public event Action Moved;
     
     private bool[] _hasPiece;
-    private bool _isWaitingForMove;
+    
+    public bool IsWaitingForMove {get; private set;}
     
     public void ResetPlayer()
     {
@@ -46,7 +48,7 @@ public class Player : MonoBehaviour
 
     public bool MakeMove(int cellIndex, int pieceNumber)
     {
-        _isWaitingForMove = false;
+        IsWaitingForMove = false;
         
         if (pieceNumber < 0 || pieceNumber > pieces.Length)
         {
@@ -136,14 +138,28 @@ public class Player : MonoBehaviour
         Lose?.Invoke();
     }
 
-    public bool IsWaitingForMove()
-    {
-        return _isWaitingForMove;
-    }
-
     public void NextTurn()
     {
-        _isWaitingForMove = true;
+        IsWaitingForMove = true;
         Turn?.Invoke();
+    }
+
+    public bool TryMakeMove(GameCell cell, GamePiece piece)
+    {
+        if (_hasPiece[piece.Number] && playground.TryMakeMove(cell, piece))
+        {
+            _hasPiece[piece.Number] = false;
+            IsWaitingForMove = false;
+            EndTurn();
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private void EndTurn()
+    {
+        IsWaitingForMove = false;
+        Moved?.Invoke();
     }
 }

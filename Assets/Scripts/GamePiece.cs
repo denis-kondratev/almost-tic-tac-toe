@@ -17,9 +17,4 @@ public class GamePiece : MonoBehaviour
     {
         transform.position = _initialPosition;
     }
-
-    public void MoveTo(Transform pieceMount)
-    {
-        transform.position = pieceMount.position;
-    }
 }
