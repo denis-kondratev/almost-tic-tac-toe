@@ -15,7 +15,7 @@ public class Playground : MonoBehaviour
         Assert.IsTrue(cells.Length == 9, $"The {nameof(cells)} must contain exactly 9 cells.");
     }
 
-    public void StartGame()
+    public void Reset()
     {
         Array.ForEach(cells, cell => cell.Reset());
         GotoState(PlaygroundState.Playing);

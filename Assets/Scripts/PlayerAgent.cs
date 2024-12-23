@@ -63,7 +63,7 @@ public class PlayerAgent : Agent
 
     public void Reset()
     {
-        player.ResetPlayer();
+        player.Reset();
     }
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)

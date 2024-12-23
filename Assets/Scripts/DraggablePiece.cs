@@ -24,7 +24,7 @@ public class DraggablePiece : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (player.State is PlayerState.WaitingForMove)
+        if (_state is State.Idle && player.State is PlayerState.WaitingForMove)
         {
             StartDragging();
         }
@@ -104,13 +104,6 @@ public class DraggablePiece : MonoBehaviour
         _targetPosition = _startDragPosition;
     }
 
-    private enum State
-    {
-        Idle,
-        Moving,
-        Dragging
-    }
-
     private bool TryFindCell(out GameCell cell)
     {
         var ray = new Ray(pieceTransform.position + Vector3.up * 2, Vector3.down);
@@ -123,5 +116,12 @@ public class DraggablePiece : MonoBehaviour
 
         cell = null;
         return false;
+    }
+
+    private enum State
+    {
+        Idle,
+        Moving,
+        Dragging
     }
 }

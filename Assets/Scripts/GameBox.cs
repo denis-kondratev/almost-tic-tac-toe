@@ -6,148 +6,106 @@ public class GameBox : MonoBehaviour
     [SerializeField] private Player bluePlayer;
     [SerializeField] private Player redPlayer;
     [SerializeField] private Playground playground;
-    [SerializeField] private float gameOverDelay = 3f;
+    [SerializeField] private float nextGameDelay = 3f;
     
-    private float _nextStepTime;
-    private State _currentState;
+    private State _state;
     
     private void Start()
     {
-        _nextStepTime = Time.time;
+        StartGame();
     }
     
     private void Update()
     {
-        if (_nextStepTime < Time.time)
+        switch (_state)
         {
-            _nextStepTime = Time.time + NextStep();
+            case State.None:
+                StartNextGame();
+                break;
+            case State.WaitForBlueMove when bluePlayer.State is not PlayerState.WaitingForMove:
+                OnPlayerMoved(bluePlayer, redPlayer);
+                break;
+            case State.WaitForRedMove when redPlayer.State is not PlayerState.WaitingForMove:
+                OnPlayerMoved(redPlayer, bluePlayer);
+                break;
         }
     }
 
-    private float NextStep()
+    private void StartNextGame()
     {
-        return _currentState switch
-        {
-            State.None => StartGame(),
-            State.BlueTurn => NextTurn(bluePlayer),
-            State.WaitForBlueMove => WaitForMove(bluePlayer),
-            State.RedTurn => NextTurn(redPlayer),
-            State.WaitForRedMove => WaitForMove(redPlayer),
-            State.BlueWin => SetupWin(bluePlayer, redPlayer),
-            State.RedWin => SetupWin(redPlayer, bluePlayer),
-            State.Draw => SetupDraw(),
-            State.BlueMadeInvalidMove => OnInvalidMove(bluePlayer),
-            State.RedMadeInvalidMove => OnInvalidMove(redPlayer),
-            _ => throw new ArgumentOutOfRangeException()
-        };
+        _state = State.GameStarting;
+        Invoke(nameof(StartGame), nextGameDelay);
     }
 
-    private float OnInvalidMove(Player player)
+    private void OnInvalidMove(Player player)
     {
         player.OnInvalidMove();
-        GotoState(State.None);
-        return gameOverDelay;
+        _state = State.None;
     }
 
-    private float SetupDraw()
+    private void SetupDraw()
     {
         bluePlayer.OnDraw();
         redPlayer.OnDraw();
-        GotoState(State.None);
-        return gameOverDelay;
+        _state = State.None;
     }
 
-    private float SetupWin(Player winner, Player loser)
+    private void SetupWin(Player winner, Player loser)
     {
         winner.OnWin();
         loser.OnLose();
-        GotoState(State.None);
-        return gameOverDelay;
+        _state = State.None;
     }
 
-    private float WaitForMove(Player player)
+    private void OnPlayerMoved(Player currentPlayer, Player otherPlayer)
     {
-        if (player.State is not PlayerState.WaitingForMove)
+        switch (playground.State)
         {
-            OnPlayerMoved(player.Team);
+            case PlaygroundState.Playing:
+                NextTurn(otherPlayer);
+                break;
+            case PlaygroundState.HasWin:
+                SetupWin(currentPlayer, otherPlayer);
+                break;
+            case PlaygroundState.InvalidMove:
+                OnInvalidMove(currentPlayer);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
-
-        return 0;
     }
 
-    private void OnPlayerMoved(Team team)
-    {
-        var nextState = GetNextState(playground.State, team);
-        GotoState(nextState);
-    }
-
-    private State GetNextState(PlaygroundState playgroundState, Team team)
-    {
-        return playgroundState switch
-        {
-            PlaygroundState.Playing => team switch
-            {
-                Team.Blue => State.RedTurn,
-                Team.Red => State.BlueTurn,
-                _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
-            },
-            PlaygroundState.HasWin => team switch
-            {
-                Team.Blue => State.BlueWin,
-                Team.Red => State.RedWin,
-                _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
-            },
-            PlaygroundState.InvalidMove => team switch
-            {
-                Team.Blue => State.BlueMadeInvalidMove,
-                Team.Red => State.RedMadeInvalidMove,
-                _ => throw new ArgumentOutOfRangeException(nameof(team), team, null)
-            },
-            _ => throw new ArgumentOutOfRangeException()
-        };
-    }
-
-    private float NextTurn(Player player)
+    private void NextTurn(Player player)
     {
         if (player.CanMakeAnyMove())
         {
             player.StartTurn();
-            var nextState = player.Team == Team.Blue ? State.WaitForBlueMove : State.WaitForRedMove;
-            GotoState(nextState);
+            _state = player.Team switch
+            {
+                Team.Blue => State.WaitForBlueMove,
+                Team.Red => State.WaitForRedMove,
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
         else
         {
-            GotoState(State.Draw);
+            SetupDraw();
         }
-
-        return 0;
     }
 
-    private float StartGame()
+    private void StartGame()
     {
-        bluePlayer.ResetPlayer();
-        redPlayer.ResetPlayer();
-        playground.StartGame();
-        GotoState(State.BlueTurn);
-        return 0;
-    }
-    
-    private void GotoState(State state)
-    {
-        _currentState = state;
+        bluePlayer.Reset();
+        redPlayer.Reset();
+        playground.Reset();
+        NextTurn(bluePlayer);
     }
 
     private enum State 
     {
         None,
-        BlueTurn,
+        GameStarting,
         WaitForBlueMove,
-        RedTurn,
-        WaitForRedMove,
-        RedMadeInvalidMove,
-        BlueMadeInvalidMove,
-        BlueWin,
-        RedWin,
-        Draw
+        WaitForRedMove
     }
 }

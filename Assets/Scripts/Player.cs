@@ -6,7 +6,6 @@ public class Player : MonoBehaviour
     [field: SerializeField] public Team Team { get; private set; }
     [SerializeField] private GamePiece[] pieces;
     [SerializeField] private Playground playground;
-    
     private bool[] _hasPiece;
 
     private PlayerState _state;
@@ -26,7 +25,7 @@ public class Player : MonoBehaviour
     
     public event Action<PlayerState> StateChanged; 
     
-    public void ResetPlayer()
+    public void Reset()
     {
         VerifyPlayer();
         Array.ForEach(pieces, x => x.Reset());
