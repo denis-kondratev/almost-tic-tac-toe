@@ -32,16 +32,16 @@ public class Playground : MonoBehaviour
         return cells[cellIndex].GetCurrentPiece();
     }
 
-    public bool CanMove(int cellIndex, int pieceNumber)
+    public bool CanMove(int cell, int piece)
     {
-        if (cellIndex < 0 || cellIndex >= cells.Length)
+        if (cell < 0 || cell >= cells.Length)
         {
-            Assert.IsTrue(false, $"Cell index is out of range. Value: {cellIndex}");
+            Debug.LogError($"Cell index is out of range. Value: {cell}");
             return false;
         }
         
-        var currentPiece = cells[cellIndex].GetCurrentPiece();
-        return currentPiece == null || currentPiece.Number > pieceNumber;
+        var currentPiece = cells[cell].GetCurrentPiece();
+        return currentPiece == null || currentPiece.Number > piece;
     }
 
     public bool CanMakeAnyMove(GamePiece piece)
@@ -110,5 +110,16 @@ public class Playground : MonoBehaviour
         }
 
         return true;
+    }
+
+    public GameCell GetCell(int cell)
+    {
+        if (cell < 0 || cell >= cells.Length)
+        {
+            Debug.LogError($"Cell index is out of range. Value: {cell}");
+            cell = 0;
+        }
+        
+        return cells[cell];
     }
 }
