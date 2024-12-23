@@ -4,6 +4,5 @@ public enum PlayerState
     WaitingForMove,
     Win,
     Lose,
-    Draw,
-    Invalid
+    Draw
 }

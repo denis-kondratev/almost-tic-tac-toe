@@ -38,12 +38,6 @@ public class GameBox : MonoBehaviour
         Invoke(nameof(StartGame), nextGameDelay);
     }
 
-    private void OnInvalidMove(Player player)
-    {
-        player.OnInvalidMove();
-        _state = State.None;
-    }
-
     private void SetupDraw()
     {
         bluePlayer.OnDraw();
@@ -67,9 +61,6 @@ public class GameBox : MonoBehaviour
                 break;
             case PlaygroundState.HasWin:
                 SetupWin(currentPlayer, otherPlayer);
-                break;
-            case PlaygroundState.InvalidMove:
-                OnInvalidMove(currentPlayer);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
