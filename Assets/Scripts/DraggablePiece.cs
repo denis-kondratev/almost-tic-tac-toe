@@ -95,7 +95,7 @@ public class DraggablePiece : MonoBehaviour
 
         if (player.State is PlayerState.WaitingForMove 
             && TryFindCell(out var cell)
-            && player.TryMakeMove(cell, piece))
+            && player.TryMakeMove(piece, cell))
         {
             _targetPosition = cell.MountPosition;
             return;

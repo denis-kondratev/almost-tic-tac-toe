@@ -69,9 +69,8 @@ public class GameBox : MonoBehaviour
 
     private void NextTurn(Player player)
     {
-        if (player.CanMakeAnyMove())
+        if (player.TryStartTurn())
         {
-            player.StartTurn();
             _state = player.Team switch
             {
                 Team.Blue => State.WaitForBlueMove,

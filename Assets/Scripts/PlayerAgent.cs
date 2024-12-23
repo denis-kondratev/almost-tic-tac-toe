@@ -1,3 +1,4 @@
+using System;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -7,94 +8,140 @@ public class PlayerAgent : Agent
 {
     [SerializeField] private Playground playground;
     [SerializeField] private Player player;
-    [SerializeField] private Player rivalPlayer;
+    [SerializeField] private Player rival;
+    [SerializeField] private float moveReward = -0.02f;
+    [SerializeField] private float winReward = 1f;
+    [SerializeField] private float loseReward = -1f;
+    [SerializeField] private float drawReward = 0.5f;
+
+    private int _pieceCount;
+    private int _cellCount;
     
-    public bool IsWaitingAction { get; private set; }
-    
-    public void MakeMove()
+    protected override void Awake()
     {
-        if (!player.CanMakeAnyMove())
-        {
-            //playground.SetDraw();
-            return;
-        }
+        base.Awake();
+        _pieceCount = player.GetPieceCount();
+        _cellCount = playground.GetCellCount();
         
-        IsWaitingAction = true;
+        if (rival.GetPieceCount() != _pieceCount)
+        {
+            Debug.LogError("Player and rival have different piece counts. " +
+                           $"Player: {_pieceCount}, Rival: {rival.GetPieceCount()}.");
+        }
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        player.StateChanged += OnPlayerStateChanged;
+    }
+    
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        player.StateChanged -= OnPlayerStateChanged;
+    }
+
+    private void OnPlayerStateChanged(PlayerState state)
+    {
+        switch (state)
+        {
+            case PlayerState.Idle:
+                break;
+            case PlayerState.WaitingForMove:
+                OnWaitingForMove();
+                break;
+            case PlayerState.Win:
+                OnWin();
+                break;
+            case PlayerState.Lose:
+                OnLose();
+                break;
+            case PlayerState.Draw:
+                OnDraw();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(state), state, null);
+        }
+    }
+
+    private void OnWaitingForMove()
+    {
         RequestDecision();
-        //Academy.Instance.EnvironmentStep();
+    }
+
+    private void OnWin()
+    {
+        AddReward(winReward);
+        EndEpisode();
+    }
+
+    private void OnLose()
+    {
+        AddReward(loseReward);
+        EndEpisode();
+    }
+
+    private void OnDraw()
+    {
+        AddReward(drawReward);
+        EndEpisode();
+    }
+    
+    private (int piece, int cell) DiscreteActionToMove(int action)
+    {
+        return (action / _cellCount, action % _cellCount);
     }
     
     public override void CollectObservations(VectorSensor sensor)
     {
-        var playgroundSize = playground.GetCellCount();
-        for (var i = 0; i < playgroundSize; i++)
+        for (var i = 0; i < _cellCount; i++)
         {
-            var cell = playground.GetCellPiece(i);
-            sensor.AddOneHotObservation(cell ? cell.Number : -1, 7);
-            sensor.AddObservation(cell && cell.Team == Team.Red);
+            var piece = playground.GetCellPiece(i);
+            sensor.AddOneHotObservation(piece ? piece.Number : -1, _pieceCount);
+            sensor.AddObservation(piece && piece.Team == Team.Red);
         }
-
-        var playerPieceCount = player.GetPieceCount();
-        for (var i = 0; i < playerPieceCount; i++)
+        
+        for (var i = 0; i < _pieceCount; i++)
         {
             sensor.AddObservation(player.HasPiece(i));
         }
-
-        var rivalPieceCount = rivalPlayer.GetPieceCount();
-        for (var i = 0; i < rivalPieceCount; i++)
+        
+        for (var i = 0; i < _pieceCount; i++)
         {
-            sensor.AddObservation(rivalPlayer.HasPiece(i));
+            sensor.AddObservation(rival.HasPiece(i));
         }
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        var pieceNumber = actions.DiscreteActions[0];
-        var cellIndex = actions.DiscreteActions[1];
+        var action = actions.DiscreteActions[0];
+        var (piece, cell) = DiscreteActionToMove(action);
         
-        if (!player.CanMove(cellIndex, pieceNumber))
+        if (!player.TryMakeMove(piece, cell))
         {
-            pieceNumber = player.GetMinPiece();
+            Debug.LogError($"Invalid move. Piece: {piece}, Cell: {cell}.");
         }
 
-        //player.MakeMove(cellIndex, pieceNumber);
-        IsWaitingAction = false;
-    }
-
-    public void Reset()
-    {
-        player.Reset();
+        AddReward(moveReward);
     }
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
         var hasAction = false;
-        
-        for (var piece = 0; piece < 7; piece++)
-        {
-            var hasPiece = player.HasPiece(piece);
-            hasAction = hasAction || hasPiece;
-            actionMask.SetActionEnabled(0, piece, hasPiece);
-        }
-        
-        if (!hasAction)
-        {
-            Debug.LogError("No move!");
-        }
+        var actionCount = _pieceCount * _cellCount;
 
-        hasAction = false;
-        var minPiece = player.GetMinPiece();
-        
-        for (var cell = 0; cell < 9; cell++)
+        for (var action = 0; action < actionCount; action++)
         {
-            var canMove = playground.CanMove(cell, minPiece);
+            var (piece, cell) = DiscreteActionToMove(action);
+            var canMove = player.CanMove(piece, cell);
             hasAction = hasAction || canMove;
-            actionMask.SetActionEnabled(1, cell, canMove);
+            actionMask.SetActionEnabled(0, action, canMove);
         }
         
         if (!hasAction)
         {
-            Debug.LogError("No move!");
+            Debug.LogError("No action! Cannot make any move.");
         }
     }
 }

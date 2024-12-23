@@ -207,7 +207,7 @@ MonoBehaviour:
   bluePlayer: {fileID: 2199125805790683552}
   redPlayer: {fileID: 6981534374758848405}
   playground: {fileID: 8225810388692176234}
-  stepDuration: 0
+  nextGameDelay: 3
 --- !u!1001 &105009455954590354
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -580,6 +580,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: RedPlayer
       objectReference: {fileID: 0}
+    - target: {fileID: 2392034754471268922, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: TeamId
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2552036977689379956, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: rival
+      value: 
+      objectReference: {fileID: 2199125805790683552}
+    - target: {fileID: 2552036977689379956, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: playground
+      value: 
+      objectReference: {fileID: 8225810388692176234}
     - target: {fileID: 4068694672628046578, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2523,6 +2535,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: BluePlayer
       objectReference: {fileID: 0}
+    - target: {fileID: 2552036977689379956, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: rival
+      value: 
+      objectReference: {fileID: 6981534374758848405}
+    - target: {fileID: 2552036977689379956, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: playground
+      value: 
+      objectReference: {fileID: 8225810388692176234}
     - target: {fileID: 4068694672628046578, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

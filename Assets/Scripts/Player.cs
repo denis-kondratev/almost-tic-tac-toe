@@ -50,7 +50,7 @@ public class Player : MonoBehaviour
         return _hasPiece[piece];
     }
 
-    public bool CanMakeAnyMove()
+    private bool CanMakeAnyMove()
     {
         for (var i = 0; i < pieces.Length; i++)
         {
@@ -74,30 +74,18 @@ public class Player : MonoBehaviour
         }
     }
 
-    public bool CanMove(int cell, int piece)
+    public bool CanMove(int piece, int cell)
     {
-        if (piece < 0 || piece > pieces.Length || !_hasPiece[piece])
+        if (piece < 0 || piece >= pieces.Length)
         {
+            Debug.LogError($"Piece index is out of range. Value: {piece}.");
             return false;
         }
-        
-        return playground.CanMove(cell, piece);
+
+        return _hasPiece[piece] && playground.CanMove(cell, piece);
     }
 
-    public int GetMinPiece()
-    {   
-        for (var i = 0; i < _hasPiece.Length; i++)
-        {
-            if (_hasPiece[i])
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    public bool TryMakeMove(GameCell cell, GamePiece piece)
+    public bool TryMakeMove(GamePiece piece, GameCell cell)
     {
         if (State is PlayerState.WaitingForMove && _hasPiece[piece.Number] && playground.TryMakeMove(cell, piece))
         {
@@ -107,6 +95,18 @@ public class Player : MonoBehaviour
         }
         
         return false;
+    }
+    
+    public bool TryMakeMove(int piece, int cell)
+    {
+        if (piece < 0 || piece > pieces.Length || cell < 0 || cell > playground.GetCellCount())
+        {
+            return false;
+        }
+
+        var gamePiece = pieces[piece];
+        var gameCell = playground.GetCell(cell);
+        return TryMakeMove(gamePiece, gameCell);
     }
 
     public void OnDraw()
@@ -124,8 +124,14 @@ public class Player : MonoBehaviour
         State = PlayerState.Lose;
     }
 
-    public void StartTurn()
+    public bool TryStartTurn()
     {
-        State = PlayerState.WaitingForMove;
+        if (CanMakeAnyMove())
+        {
+            State = PlayerState.WaitingForMove;
+            return true;
+        }
+        
+        return false;
     }
 }
