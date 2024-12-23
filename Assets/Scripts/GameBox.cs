@@ -6,7 +6,7 @@ public class GameBox : MonoBehaviour
     [SerializeField] private Player bluePlayer;
     [SerializeField] private Player redPlayer;
     [SerializeField] private Playground playground;
-    [SerializeField] private float stepDuration = 0.5f; 
+    [SerializeField] private float gameOverDelay = 3f;
     
     private float _nextStepTime;
     private State _currentState;
@@ -20,76 +20,59 @@ public class GameBox : MonoBehaviour
     {
         if (_nextStepTime < Time.time)
         {
-            _nextStepTime += stepDuration;
-            NextStep();
+            _nextStepTime = Time.time + NextStep();
         }
     }
 
-    private void NextStep()
+    private float NextStep()
     {
-        switch (_currentState)
+        return _currentState switch
         {
-            case State.None:
-                StartGame();
-                break;
-            case State.BlueTurn:
-                NextTurn(bluePlayer);
-                break;
-            case State.WaitForBlueMove:
-                WaitForMove(bluePlayer);
-                break;
-            case State.RedTurn:
-                NextTurn(redPlayer);
-                break;
-            case State.WaitForRedMove:
-                WaitForMove(redPlayer);
-                break;
-            case State.BlueWin:
-                SetupWin(bluePlayer, redPlayer);
-                break;
-            case State.RedWin:
-                SetupWin(redPlayer, bluePlayer);
-                break;
-            case State.Draw:
-                SetupDraw();
-                break;
-            case State.BlueMadeInvalidMove:
-                OnInvalidMove(bluePlayer);
-                break;
-            case State.RedMadeInvalidMove:
-                OnInvalidMove(redPlayer);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            State.None => StartGame(),
+            State.BlueTurn => NextTurn(bluePlayer),
+            State.WaitForBlueMove => WaitForMove(bluePlayer),
+            State.RedTurn => NextTurn(redPlayer),
+            State.WaitForRedMove => WaitForMove(redPlayer),
+            State.BlueWin => SetupWin(bluePlayer, redPlayer),
+            State.RedWin => SetupWin(redPlayer, bluePlayer),
+            State.Draw => SetupDraw(),
+            State.BlueMadeInvalidMove => OnInvalidMove(bluePlayer),
+            State.RedMadeInvalidMove => OnInvalidMove(redPlayer),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
-    private void OnInvalidMove(Player player)
+    private float OnInvalidMove(Player player)
     {
         player.OnInvalidMove();
         GotoState(State.None);
+        return gameOverDelay;
     }
 
-    private void SetupDraw()
+    private float SetupDraw()
     {
         bluePlayer.OnDraw();
         redPlayer.OnDraw();
         GotoState(State.None);
+        return gameOverDelay;
     }
 
-    private void SetupWin(Player winner, Player loser)
+    private float SetupWin(Player winner, Player loser)
     {
         winner.OnWin();
         loser.OnLose();
         GotoState(State.None);
+        return gameOverDelay;
     }
 
-    private void WaitForMove(Player player)
+    private float WaitForMove(Player player)
     {
         if (player.State is not PlayerState.WaitingForMove)
         {
             OnPlayerMoved(player.Team);
         }
+
+        return 0;
     }
 
     private void OnPlayerMoved(Team team)
@@ -124,7 +107,7 @@ public class GameBox : MonoBehaviour
         };
     }
 
-    private void NextTurn(Player player)
+    private float NextTurn(Player player)
     {
         if (player.CanMakeAnyMove())
         {
@@ -136,14 +119,17 @@ public class GameBox : MonoBehaviour
         {
             GotoState(State.Draw);
         }
+
+        return 0;
     }
 
-    private void StartGame()
+    private float StartGame()
     {
         bluePlayer.ResetPlayer();
         redPlayer.ResetPlayer();
         playground.StartGame();
         GotoState(State.BlueTurn);
+        return 0;
     }
     
     private void GotoState(State state)
