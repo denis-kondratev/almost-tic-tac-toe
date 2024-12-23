@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameBox : MonoBehaviour
 {    
@@ -98,7 +99,12 @@ public class GameBox : MonoBehaviour
         bluePlayer.Reset();
         redPlayer.Reset();
         playground.Reset();
-        NextTurn(bluePlayer);
+        NextTurn(Random.Range(0,2) switch
+        {
+            0 => bluePlayer,
+            1 => redPlayer,
+            _ => throw new ArgumentOutOfRangeException()
+        });
     }
 
     private enum State 
