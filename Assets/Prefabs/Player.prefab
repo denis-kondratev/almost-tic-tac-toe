@@ -99,7 +99,7 @@ MonoBehaviour:
   playground: {fileID: 0}
   player: {fileID: 7905706640281636354}
   rival: {fileID: 0}
-  moveReward: -0.02
+  moveReward: 0
   winReward: 1
   loseReward: -1
   drawReward: 0.5

@@ -129,7 +129,7 @@ public class PlayerAgent : Agent
         
             if (!hasMoved)
             {
-                Debug.LogError($"Invalid move. Piece: {piece}, Cell: {cell}.");
+                Debug.LogError($"Invalid move. Piece: {piece}, Cell: {cell}. Player: {player.name}.");
             }
 
             AddReward(moveReward);
