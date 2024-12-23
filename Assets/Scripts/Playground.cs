@@ -44,33 +44,6 @@ public class Playground : MonoBehaviour
         return currentPiece == null || currentPiece.Number > pieceNumber;
     }
 
-    public void MakeInvalidMove()
-    {
-        GotoState(PlaygroundState.InvalidMove);
-    }
-
-    public bool MakeMove(int cellIndex, GamePiece piece)
-    {
-        if (cellIndex < 0 || cellIndex >= cells.Length)
-        {
-            MakeInvalidMove();
-            return false;
-        }
-
-        if (!cells[cellIndex].TryMovePiece(piece))
-        {
-            MakeInvalidMove();
-            return false;
-        }
-
-        if (CheckWin(cellIndex, piece.Team))
-        {
-            GotoState(PlaygroundState.HasWin);
-        }
-        
-        return true;
-    }
-
     public bool CanMakeAnyMove(GamePiece piece)
     {
         foreach (var cell in cells)

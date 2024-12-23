@@ -109,11 +109,6 @@ public class Player : MonoBehaviour
         return false;
     }
 
-    public void OnInvalidMove()
-    {
-        State = PlayerState.Invalid;
-    }
-
     public void OnDraw()
     {
         State = PlayerState.Draw;
