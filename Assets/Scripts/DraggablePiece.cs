@@ -24,7 +24,7 @@ public class DraggablePiece : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (_state is State.Idle && player.State is PlayerState.WaitingForMove)
+        if (!piece.IsTranslating && _state is State.Idle && player.State is PlayerState.WaitingForMove)
         {
             StartDragging();
         }

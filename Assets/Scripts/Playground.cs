@@ -95,7 +95,7 @@ public class Playground : MonoBehaviour
         State = state;
     }
 
-    public bool TryMakeMove(GameCell cell, GamePiece piece)
+    public bool TryMakeMove(GamePiece piece, GameCell cell)
     {
         if (State is not PlaygroundState.Playing || !cell.TryMovePiece(piece))
         {
