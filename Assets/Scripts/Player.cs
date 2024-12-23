@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -87,17 +88,27 @@ public class Player : MonoBehaviour
 
     public bool TryMakeMove(GamePiece piece, GameCell cell)
     {
-        if (State is PlayerState.WaitingForMove && _hasPiece[piece.Number] && playground.TryMakeMove(cell, piece))
+        if (TryMovePieceToCell(piece, cell))
         {
-            _hasPiece[piece.Number] = false;
             State = PlayerState.Idle;
             return true;
         }
         
         return false;
     }
-    
-    public bool TryMakeMove(int piece, int cell)
+
+    private bool TryMovePieceToCell(GamePiece piece, GameCell cell)
+    {
+        if (State is PlayerState.WaitingForMove && _hasPiece[piece.Number] && playground.TryMakeMove(piece, cell))
+        {
+            _hasPiece[piece.Number] = false;
+            return true;
+        }
+
+        return false;
+    }
+
+    public async Awaitable<bool> TryMakeMoveWithTranslation(int piece, int cell)
     {
         if (piece < 0 || piece > pieces.Length || cell < 0 || cell > playground.GetCellCount())
         {
@@ -106,7 +117,21 @@ public class Player : MonoBehaviour
 
         var gamePiece = pieces[piece];
         var gameCell = playground.GetCell(cell);
-        return TryMakeMove(gamePiece, gameCell);
+        
+        if (TryMovePieceToCell(gamePiece, gameCell))
+        {
+            await gamePiece.TranslateToCell(gameCell);
+            
+            if (destroyCancellationToken.IsCancellationRequested)
+            {
+                return false;
+            }
+            
+            State = PlayerState.Idle;
+            return true;
+        }
+
+        return false;
     }
 
     public void OnDraw()

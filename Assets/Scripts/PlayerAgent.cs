@@ -113,17 +113,33 @@ public class PlayerAgent : Agent
         }
     }
 
-    public override void OnActionReceived(ActionBuffers actions)
+    public override async void OnActionReceived(ActionBuffers actions)
     {
-        var action = actions.DiscreteActions[0];
-        var (piece, cell) = DiscreteActionToMove(action);
-        
-        if (!player.TryMakeMove(piece, cell))
+        try
         {
-            Debug.LogError($"Invalid move. Piece: {piece}, Cell: {cell}.");
-        }
+            var action = actions.DiscreteActions[0];
+            var (piece, cell) = DiscreteActionToMove(action);
+            
+            var hasMoved = await player.TryMakeMoveWithTranslation(piece, cell);
 
-        AddReward(moveReward);
+            if (destroyCancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+        
+            if (!hasMoved)
+            {
+                Debug.LogError($"Invalid move. Piece: {piece}, Cell: {cell}.");
+            }
+
+            AddReward(moveReward);
+            
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+        }
     }
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
