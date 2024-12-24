@@ -27,6 +27,12 @@ public class GamePiece : MonoBehaviour
 
     public async Awaitable TranslateToCell(GameCell gameCell)
     {
+        if (translateSpeed <= 0)
+        {
+            transform.position = gameCell.MountPosition;
+            return;
+        }
+        
         IsTranslating = true;
         var targetPosition = gameCell.MountPosition;
         animator.SetBool(IsDragging, true);
