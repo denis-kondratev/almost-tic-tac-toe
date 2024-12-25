@@ -1,8 +1,10 @@
 using System;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class PlayerAgent : Agent
 {
@@ -16,6 +18,10 @@ public class PlayerAgent : Agent
 
     private int _pieceCount;
     private int _cellCount;
+    private Move _lastHeuristicMove;
+    private BehaviorParameters _parameters;
+    
+    private bool IsHeuristic => _parameters.BehaviorType == BehaviorType.HeuristicOnly;
     
     protected override void Awake()
     {
@@ -23,23 +29,36 @@ public class PlayerAgent : Agent
         _pieceCount = player.GetPieceCount();
         _cellCount = playground.GetCellCount();
         
-        if (rival.GetPieceCount() != _pieceCount)
-        {
-            Debug.LogError("Player and rival have different piece counts. " +
-                           $"Player: {_pieceCount}, Rival: {rival.GetPieceCount()}.");
-        }
+        Assert.AreEqual(rival.GetPieceCount(), _pieceCount,
+            "Player and rival have different piece counts. " +
+            $"Player: {_pieceCount}, Rival: {rival.GetPieceCount()}.");
+        
+        _parameters = GetComponent<BehaviorParameters>();
+        Assert.IsNotNull(_parameters, $"Cannot find {nameof(BehaviorParameters)} on game object {name}.");
     }
 
     protected override void OnEnable()
     {
         base.OnEnable();
         player.StateChanged += OnPlayerStateChanged;
+
+        if (IsHeuristic)
+        {
+            player.MadeMove += OnPlayerMadeMove;
+        }
     }
     
     protected override void OnDisable()
     {
         base.OnDisable();
         player.StateChanged -= OnPlayerStateChanged;
+        player.MadeMove -= OnPlayerMadeMove;
+    }
+
+    private void OnPlayerMadeMove(Move move)
+    {
+        _lastHeuristicMove = move;
+        RequestDecision();
     }
 
     private void OnPlayerStateChanged(PlayerState state)
@@ -48,49 +67,43 @@ public class PlayerAgent : Agent
         {
             case PlayerState.Idle:
                 break;
-            case PlayerState.WaitingForMove:
-                OnWaitingForMove();
+            case PlayerState.WaitingForMove when !IsHeuristic:
+                RequestDecision();
                 break;
             case PlayerState.Win:
-                OnWin();
+                EndEpisode(winReward);
                 break;
             case PlayerState.Lose:
-                OnLose();
+                EndEpisode(loseReward);
                 break;
             case PlayerState.Draw:
-                OnDraw();
+                EndEpisode(drawReward);
                 break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(state), state, null);
         }
     }
 
-    private void OnWaitingForMove()
+    private void EndEpisode(float reward)
     {
-        RequestDecision();
-    }
-
-    private void OnWin()
-    {
-        AddReward(winReward);
-        EndEpisode();
-    }
-
-    private void OnLose()
-    {
-        AddReward(loseReward);
-        EndEpisode();
-    }
-
-    private void OnDraw()
-    {
-        AddReward(drawReward);
+        AddReward(reward);
         EndEpisode();
     }
     
-    private (int piece, int cell) DiscreteActionToMove(int action)
+    private Move DiscreteActionToMove(int action)
     {
-        return (action / _cellCount, action % _cellCount);
+        if (action < 0 || action >= _cellCount * _pieceCount)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(action),
+                $"Action value {action} is out of range. Valid range: 0 to {_cellCount * _pieceCount - 1}."
+            );
+        }
+        
+        return new Move(action / _cellCount, action % _cellCount);
+    }
+
+    private int MoveToDiscreteAction(Move move)
+    {
+        return move.Piece * _cellCount + move.Cell;
     }
     
     public override void CollectObservations(VectorSensor sensor)
@@ -120,7 +133,7 @@ public class PlayerAgent : Agent
             var action = actions.DiscreteActions[0];
             var (piece, cell) = DiscreteActionToMove(action);
             
-            var hasMoved = await player.TryMakeMoveWithTranslation(piece, cell);
+            var hasMoved = IsHeuristic || await player.TryMakeMoveWithTranslation(piece, cell);
 
             if (destroyCancellationToken.IsCancellationRequested)
             {
@@ -159,5 +172,11 @@ public class PlayerAgent : Agent
         {
             Debug.LogError("No action! Cannot make any move.");
         }
+    }
+
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        var actions = actionsOut.DiscreteActions;
+        actions[0] = MoveToDiscreteAction(_lastHeuristicMove);
     }
 }

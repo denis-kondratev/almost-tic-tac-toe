@@ -3,6 +3,7 @@ using UnityEngine;
 public class GameCell : MonoBehaviour
 {
     [SerializeField] private Transform pieceMount;
+    [field: SerializeField] public int Index { get; private set; }
     
     public Vector3 MountPosition => pieceMount.position;
     private GamePiece _currentPiece;
