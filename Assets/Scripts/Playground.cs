@@ -12,7 +12,7 @@ public class Playground : MonoBehaviour
 
     private void Awake()
     {
-        Assert.IsTrue(cells.Length == 9, $"The {nameof(cells)} must contain exactly 9 cells.");
+        VerifyPlayground();
     }
 
     public void Reset()
@@ -121,5 +121,15 @@ public class Playground : MonoBehaviour
         }
         
         return cells[cell];
+    }
+    
+    private void VerifyPlayground()
+    {
+        Assert.IsTrue(cells.Length == 9, $"The {nameof(cells)} must contain exactly 9 cells.");
+        
+        for (var i = 0; i < cells.Length; i++)
+        {
+            Assert.IsTrue(cells[i].Index == i, $"Invalid cell size: {cells[i].Index}. Playground: {gameObject.name}.");
+        }
     }
 }

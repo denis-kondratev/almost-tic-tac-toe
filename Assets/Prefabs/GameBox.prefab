@@ -584,6 +584,10 @@ PrefabInstance:
       propertyPath: TeamId
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2392034754471268922, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 65eab3d8363d14058a7f4e55e07a1d85, type: 3}
     - target: {fileID: 2552036977689379956, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
       propertyPath: rival
       value: 
@@ -2570,6 +2574,14 @@ PrefabInstance:
     - target: {fileID: 714615596928521124, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
       propertyPath: m_Name
       value: BluePlayer
+      objectReference: {fileID: 0}
+    - target: {fileID: 2392034754471268922, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 65eab3d8363d14058a7f4e55e07a1d85, type: 3}
+    - target: {fileID: 2392034754471268922, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: m_BehaviorType
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2552036977689379956, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
       propertyPath: rival

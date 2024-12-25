@@ -23,7 +23,8 @@ public class Player : MonoBehaviour
         }
     }
     
-    public event Action<PlayerState> StateChanged; 
+    public event Action<PlayerState> StateChanged;
+    public event Action<Move> MadeMove;
     
     public void Reset()
     {
@@ -89,6 +90,7 @@ public class Player : MonoBehaviour
     {
         if (TryMovePieceToCell(piece, cell))
         {
+            MadeMove?.Invoke(new Move(piece.Number, cell.Index));
             State = PlayerState.Idle;
             return true;
         }
