@@ -16,7 +16,6 @@ public class PlayerAgent : Agent
     [SerializeField] private float loseReward = -0.1f;
     [SerializeField] private float drawReward = 0.5f;
     [SerializeField] private float missedWinReward = -0.1f; 
-    [SerializeField] private float failedPreventLossReward = -0.1f; 
 
     private int _pieceCount;
     private int _cellCount;
@@ -163,17 +162,9 @@ public class PlayerAgent : Agent
         }
 
         var minPiece = Math.Min(move.Piece, player.GetMinPiece());
-        if (player.HasMissedWin(move, minPiece))
-        {
-            return missedWinReward;
-        }
-
-        if (player.HasFailedPreventLoss(move))
-        {
-            return failedPreventLossReward;
-        }
-
-        return defaultMoveReward;
+        Assert.IsTrue(minPiece >= 0, $"Player '{player.name}' has no piece.");
+        
+        return HasMissedWin(move, minPiece) ? missedWinReward : defaultMoveReward;
     }
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
@@ -199,5 +190,13 @@ public class PlayerAgent : Agent
     {
         var actions = actionsOut.DiscreteActions;
         actions[0] = MoveToDiscreteAction(_lastHeuristicMove);
+    }
+    
+    private bool HasMissedWin(Move move, int minPiece)
+    {
+        var playgroundMask = playground.GetMask(player.Team);
+        
+        return !playground.IsWinningMove(move, playgroundMask) 
+               && playground.HasWinningMove(playgroundMask, minPiece);
     }
 }

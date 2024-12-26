@@ -106,11 +106,6 @@ public class Playground : MonoBehaviour
 
         return true;
     }
-
-    public bool CanPreventLoss(Move move, Team team)
-    {
-        return false;
-    }
     
     public int GetMask(Team team)
     {
