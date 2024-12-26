@@ -11,10 +11,12 @@ public class PlayerAgent : Agent
     [SerializeField] private Playground playground;
     [SerializeField] private Player player;
     [SerializeField] private Player rival;
-    [SerializeField] private float moveReward = -0.02f;
+    [SerializeField] private float defaultMoveReward = 0;
     [SerializeField] private float winReward = 1f;
-    [SerializeField] private float loseReward = -1f;
+    [SerializeField] private float loseReward = -0.1f;
     [SerializeField] private float drawReward = 0.5f;
+    [SerializeField] private float missedWinReward = -0.1f; 
+    [SerializeField] private float failedPreventLossReward = -0.1f; 
 
     private int _pieceCount;
     private int _cellCount;
@@ -131,9 +133,10 @@ public class PlayerAgent : Agent
         try
         {
             var action = actions.DiscreteActions[0];
-            var (piece, cell) = DiscreteActionToMove(action);
+            var move = DiscreteActionToMove(action);
             
-            var hasMoved = IsHeuristic || await player.TryMakeMoveWithTranslation(piece, cell);
+            AddReward(GetRewardForMove(move));
+            var hasMoved = IsHeuristic || await player.TryMakeMoveWithTranslation(move);
 
             if (destroyCancellationToken.IsCancellationRequested)
             {
@@ -142,17 +145,35 @@ public class PlayerAgent : Agent
         
             if (!hasMoved)
             {
-                Debug.LogError($"Invalid move. Piece: {piece}, Cell: {cell}. Player: {player.name}.");
+                Debug.LogError($"Invalid move. Piece: {move.Piece}, Cell: {move.Cell}. Player: {player.name}.");
             }
-
-            AddReward(moveReward);
-            
         }
         catch (OperationCanceledException) { }
         catch (Exception e)
         {
             Debug.LogError(e);
         }
+    }
+
+    private float GetRewardForMove(Move move)
+    {
+        if (IsHeuristic)
+        {
+            return defaultMoveReward;
+        }
+
+        var minPiece = Math.Min(move.Piece, player.GetMinPiece());
+        if (player.HasMissedWin(move, minPiece))
+        {
+            return missedWinReward;
+        }
+
+        if (player.HasFailedPreventLoss(move))
+        {
+            return failedPreventLossReward;
+        }
+
+        return defaultMoveReward;
     }
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
@@ -162,8 +183,8 @@ public class PlayerAgent : Agent
 
         for (var action = 0; action < actionCount; action++)
         {
-            var (piece, cell) = DiscreteActionToMove(action);
-            var canMove = player.CanMove(piece, cell);
+            var move = DiscreteActionToMove(action);
+            var canMove = player.CanMove(move);
             hasAction = hasAction || canMove;
             actionMask.SetActionEnabled(0, action, canMove);
         }
