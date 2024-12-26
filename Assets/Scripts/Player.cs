@@ -75,15 +75,16 @@ public class Player : MonoBehaviour
         }
     }
 
-    public bool CanMove(int piece, int cell)
+    public bool CanMove(Move move)
     {
+        var (piece, _) = move;
         if (piece < 0 || piece >= pieces.Length)
         {
             Debug.LogError($"Piece index is out of range. Value: {piece}.");
             return false;
         }
 
-        return _hasPiece[piece] && playground.CanMove(cell, piece);
+        return _hasPiece[piece] && playground.CanMove(move);
     }
 
     public bool TryMakeMove(GamePiece piece, GameCell cell)
@@ -109,8 +110,9 @@ public class Player : MonoBehaviour
         return false;
     }
 
-    public async Awaitable<bool> TryMakeMoveWithTranslation(int piece, int cell)
+    public async Awaitable<bool> TryMakeMoveWithTranslation(Move move)
     {
+        var (piece, cell) = move;
         if (piece < 0 || piece > pieces.Length || cell < 0 || cell > playground.GetCellCount())
         {
             return false;
@@ -159,5 +161,35 @@ public class Player : MonoBehaviour
         }
         
         return false;
+    }
+
+    public bool HasMissedWin(Move move, int minPiece)
+    {
+        var playgroundMask = playground.GetMask(Team);
+        
+        if (playground.IsWinningMove(move, playgroundMask))
+        {
+            return false;
+        }
+
+        return playground.HasWinningMove(playgroundMask, minPiece);
+    }
+
+    public bool HasFailedPreventLoss(Move move)
+    {
+        return playground.CanPreventLoss(move, Team);
+    }
+
+    public int GetMinPiece()
+    {
+        for (var i = 0; i < _hasPiece.Length; i++)
+        {
+            if (_hasPiece[i])
+            {
+                return i;
+            }
+        }
+
+        throw new InvalidOperationException($"Player '{name}' has no piece.");
     }
 }

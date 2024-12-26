@@ -9,6 +9,11 @@ public class Playground : MonoBehaviour
     public PlaygroundState State { get; private set; }
     
     public int GetCellCount() => cells.Length;
+    
+    private static readonly int[] WinningMasks = {
+        0b111000000, 0b000111000, 0b000000111, 0b100100100,
+        0b010010010, 0b001001001, 0b100010001, 0b001010100
+    };
 
     private void Awake()
     {
@@ -32,8 +37,9 @@ public class Playground : MonoBehaviour
         return cells[cellIndex].GetCurrentPiece();
     }
 
-    public bool CanMove(int cell, int piece)
+    public bool CanMove(Move move)
     {
+        var (piece, cell) = move;
         if (cell < 0 || cell >= cells.Length)
         {
             Debug.LogError($"Cell index is out of range. Value: {cell}");
@@ -57,54 +63,14 @@ public class Playground : MonoBehaviour
         return false;
     }
 
-    private bool CheckWin(int cellIndex, Team team)
-    {
-        var rowStart = cellIndex / 3 * 3;
-        if (cells[rowStart].IsTeam(team) && cells[rowStart + 1].IsTeam(team) && cells[rowStart + 2].IsTeam(team))
-        {
-            return true;
-        }
-
-        var colStart = cellIndex % 3;
-        if (cells[colStart].IsTeam(team) && cells[colStart + 3].IsTeam(team) && cells[colStart + 6].IsTeam(team))
-        {
-            return true;
-        }
-
-        if (cellIndex is 0 or 4 or 8)
-        {
-            if (cells[0].IsTeam(team) && cells[4].IsTeam(team) && cells[8].IsTeam(team))
-            {
-                return true;
-            }
-        }
-
-        if (cellIndex is 2 or 4 or 6)
-        {
-            if (cells[2].IsTeam(team) && cells[4].IsTeam(team) && cells[6].IsTeam(team))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-    
-    private void GotoState(PlaygroundState state)
-    {
-        State = state;
-    }
-
     public bool TryMakeMove(GamePiece piece, GameCell cell)
     {
         if (State is not PlaygroundState.Playing || !cell.TryMovePiece(piece))
         {
             return false;
         }
-        
-        var cellIndex = Array.IndexOf(cells, cell);
-            
-        if (CheckWin(cellIndex, piece.Team))
+
+        if (CanWinAtCell(cell.Index, GetMask(piece.Team)))
         {
             GotoState(PlaygroundState.HasWin);
         }
@@ -123,6 +89,48 @@ public class Playground : MonoBehaviour
         return cells[cell];
     }
     
+    public bool IsWinningMove(Move move, int playgroundMask)
+    {
+        return CanMove(move) && CanWinAtCell(move.Cell, playgroundMask);
+    }
+
+    public bool HasWinningMove(int playgroundMask, int minPiece)
+    {
+        for (var i = 0; i < 9; i++)
+        {
+            if (IsWinningMove(new Move(minPiece, i), playgroundMask))
+            {
+                return true;
+            }
+        }
+
+        return true;
+    }
+
+    public bool CanPreventLoss(Move move, Team team)
+    {
+        return false;
+    }
+    
+    public int GetMask(Team team)
+    {
+        var mask = 0;
+        for (var i = 0; i < 9; i++)
+        {
+            if (cells[i].IsTeam(team))
+            {
+                mask |= 1 << i;
+            }
+        }
+
+        return mask;
+    }
+
+    private void GotoState(PlaygroundState state)
+    {
+        State = state;
+    }
+
     private void VerifyPlayground()
     {
         Assert.IsTrue(cells.Length == 9, $"The {nameof(cells)} must contain exactly 9 cells.");
@@ -131,5 +139,20 @@ public class Playground : MonoBehaviour
         {
             Assert.IsTrue(cells[i].Index == i, $"Invalid cell size: {cells[i].Index}. Playground: {gameObject.name}.");
         }
+    }
+
+    private bool CanWinAtCell(int cell, int playgroundMask)
+    {
+        var moveMask = 1 << cell;
+        
+        foreach (var mask in WinningMasks)
+        {
+            if (((playgroundMask | moveMask) & mask) == mask)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
