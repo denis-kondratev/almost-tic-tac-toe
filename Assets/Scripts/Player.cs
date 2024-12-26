@@ -53,15 +53,8 @@ public class Player : MonoBehaviour
 
     private bool CanMakeAnyMove()
     {
-        for (var i = 0; i < pieces.Length; i++)
-        {
-            if (_hasPiece[i] && playground.CanMakeAnyMove(pieces[i]))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        var minPiece = GetMinPiece();
+        return minPiece >= 0 && playground.CanMakeAnyMove(pieces[minPiece]);
     }
 
     private void VerifyPlayer()
@@ -163,23 +156,6 @@ public class Player : MonoBehaviour
         return false;
     }
 
-    public bool HasMissedWin(Move move, int minPiece)
-    {
-        var playgroundMask = playground.GetMask(Team);
-        
-        if (playground.IsWinningMove(move, playgroundMask))
-        {
-            return false;
-        }
-
-        return playground.HasWinningMove(playgroundMask, minPiece);
-    }
-
-    public bool HasFailedPreventLoss(Move move)
-    {
-        return playground.CanPreventLoss(move, Team);
-    }
-
     public int GetMinPiece()
     {
         for (var i = 0; i < _hasPiece.Length; i++)
@@ -190,6 +166,6 @@ public class Player : MonoBehaviour
             }
         }
 
-        throw new InvalidOperationException($"Player '{name}' has no piece.");
+        return -1;
     }
 }
