@@ -1,3 +1,4 @@
+using Unity.MLAgents;
 using UnityEngine;
 
 public class GamePiece : MonoBehaviour
@@ -27,7 +28,7 @@ public class GamePiece : MonoBehaviour
 
     public async Awaitable TranslateToCell(GameCell gameCell)
     {
-        if (translateSpeed <= 0)
+        if (translateSpeed <= 0 || Academy.Instance.IsCommunicatorOn)
         {
             transform.position = gameCell.MountPosition;
             return;
