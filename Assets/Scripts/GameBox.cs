@@ -1,4 +1,5 @@
 using System;
+using Unity.MLAgents;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -7,7 +8,7 @@ public class GameBox : MonoBehaviour
     [SerializeField] private Player bluePlayer;
     [SerializeField] private Player redPlayer;
     [SerializeField] private Playground playground;
-    [SerializeField] private float nextGameDelay = 3f;
+    [SerializeField] private float nextGameDelay = 2f;
     
     private State _state;
     
@@ -35,7 +36,15 @@ public class GameBox : MonoBehaviour
     private void StartNextGame()
     {
         _state = State.GameStarting;
-        Invoke(nameof(StartGame), nextGameDelay);
+        
+        if (Academy.Instance.IsCommunicatorOn)
+        {
+            StartGame();
+        }
+        else
+        {
+            Invoke(nameof(StartGame), nextGameDelay);
+        }
     }
 
     private void SetupDraw()

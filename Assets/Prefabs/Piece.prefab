@@ -18562,7 +18562,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Number>k__BackingField: 0
   <Team>k__BackingField: 0
-  translateSpeed: 5
+  translateSpeed: 8
   animator: {fileID: 3639427233785816255}
   translateCurve:
     serializedVersion: 2
