@@ -485,7 +485,7 @@ PrefabInstance:
     - target: {fileID: 2392034754471268922, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
       propertyPath: m_Model
       value: 
-      objectReference: {fileID: 5022602860645237092, guid: 6e9b4d2d08a004b7e897ebc8db92cc2b, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 2552036977689379956, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
       propertyPath: rival
       value: 
@@ -534,6 +534,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4581095189577485768, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: rival
+      value: 
+      objectReference: {fileID: 2199125805790683552}
+    - target: {fileID: 4581095189577485768, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: playground
+      value: 
+      objectReference: {fileID: 8225810388692176234}
     - target: {fileID: 6491208621228028433, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
       propertyPath: TeamId
       value: 1
@@ -2481,14 +2489,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: BluePlayer
       objectReference: {fileID: 0}
-    - target: {fileID: 2392034754471268922, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
-      propertyPath: m_Model
-      value: 
-      objectReference: {fileID: 5022602860645237092, guid: 6e9b4d2d08a004b7e897ebc8db92cc2b, type: 3}
-    - target: {fileID: 2392034754471268922, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
-      propertyPath: m_BehaviorType
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 2552036977689379956, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
       propertyPath: rival
       value: 
@@ -2537,6 +2537,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4581095189577485768, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: rival
+      value: 
+      objectReference: {fileID: 6981534374758848405}
+    - target: {fileID: 4581095189577485768, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
+      propertyPath: playground
+      value: 
+      objectReference: {fileID: 8225810388692176234}
     - target: {fileID: 6491208621228028433, guid: a090c240fa6ca4c89b24d2b271d453d8, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 9
