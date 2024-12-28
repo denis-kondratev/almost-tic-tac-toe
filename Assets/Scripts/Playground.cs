@@ -120,6 +120,28 @@ public class Playground : MonoBehaviour
 
         return mask;
     }
+    
+    public int GetAvailableCells(int piece, int[] buffer)
+    {
+        if (buffer.Length < CellCount)
+        {
+            throw new ArgumentException(
+                $"The buffer must have at least {CellCount} elements. Actual buffer size is {buffer.Length}.", 
+                nameof(buffer));
+        }
+        
+        var count = 0;
+        
+        for (var i = 0; i < CellCount; i++)
+        {
+            if (CanMove(new Move(piece, i)))
+            {
+                buffer[count++] = i;
+            }
+        }
+
+        return count;
+    }
 
     private void GotoState(PlaygroundState state)
     {

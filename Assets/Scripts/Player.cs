@@ -169,4 +169,31 @@ public class Player : MonoBehaviour
 
         return -1;
     }
+
+    public int GetAvailablePieces(int cell, int[] buffer)
+    {
+        if (cell is < 0 or >= Playground.CellCount)
+        {
+            throw new ArgumentException($"Invalid cell index. Value: {cell}.", nameof(cell));
+        }
+        
+        if (buffer.Length < PieceCount)
+        {
+            throw new ArgumentException(
+                $"The buffer is too small. Expected: {PieceCount}. Actual: {buffer.Length}.",
+                nameof(buffer));
+        }
+        
+        var count = 0;
+        
+        for (var i = 0; i < PieceCount; i++)
+        {
+            if (_hasPiece[i] && playground.CanMove(new Move(i, cell)))
+            {
+                buffer[count++] = i;
+            }
+        }
+
+        return count;
+    }
 }
