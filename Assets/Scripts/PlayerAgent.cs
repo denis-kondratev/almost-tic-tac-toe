@@ -199,4 +199,21 @@ public class PlayerAgent : Agent
         return !playground.IsWinningMove(move, playgroundMask) 
                && playground.HasWinningMove(playgroundMask, minPiece);
     }
+    
+#if UNITY_EDITOR
+    [ContextMenu("Setup Parameters")]
+    private void SetupParameters()
+    {
+        var parameters = GetComponent<BehaviorParameters>();
+        if (parameters == null)
+        {
+            Debug.LogError($"Cannot find {nameof(BehaviorParameters)} on game object {name}.");
+            return;
+        }
+        
+        parameters.BrainParameters.VectorObservationSize = 86;
+        parameters.BrainParameters.ActionSpec = ActionSpec.MakeDiscrete(63);
+        UnityEditor.EditorUtility.SetDirty(parameters);
+    }
+#endif
 }
