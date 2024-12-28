@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class Player : MonoBehaviour
 { 
@@ -7,6 +8,8 @@ public class Player : MonoBehaviour
     [SerializeField] private GamePiece[] pieces;
     [SerializeField] private Playground playground;
     private bool[] _hasPiece;
+    
+    public const int PieceCount = 7;
 
     private PlayerState _state;
 
@@ -59,6 +62,9 @@ public class Player : MonoBehaviour
 
     private void VerifyPlayer()
     {
+        Assert.AreEqual(pieces.Length, PieceCount, 
+            $"Invalid piece count: {pieces.Length}. Player: {gameObject.name}. Expected: {PieceCount}.");
+        
         for (var i = 0; i < pieces.Length; i++)
         {
             if (pieces[i].Number != i)
@@ -106,11 +112,6 @@ public class Player : MonoBehaviour
     public async Awaitable<bool> TryMakeMoveWithTranslation(Move move)
     {
         var (piece, cell) = move;
-        if (piece < 0 || piece > pieces.Length || cell < 0 || cell > playground.GetCellCount())
-        {
-            return false;
-        }
-
         var gamePiece = pieces[piece];
         var gameCell = playground.GetCell(cell);
         

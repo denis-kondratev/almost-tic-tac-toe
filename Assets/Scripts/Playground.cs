@@ -8,7 +8,7 @@ public class Playground : MonoBehaviour
 
     public PlaygroundState State { get; private set; }
     
-    public int GetCellCount() => cells.Length;
+    public const int CellCount = 9;
     
     private static readonly int[] WinningMasks = {
         0b111000000, 0b000111000, 0b000000111, 0b100100100,
@@ -96,7 +96,7 @@ public class Playground : MonoBehaviour
 
     public bool HasWinningMove(int playgroundMask, int minPiece)
     {
-        for (var i = 0; i < 9; i++)
+        for (var i = 0; i < CellCount; i++)
         {
             if (IsWinningMove(new Move(minPiece, i), playgroundMask))
             {
@@ -110,7 +110,7 @@ public class Playground : MonoBehaviour
     public int GetMask(Team team)
     {
         var mask = 0;
-        for (var i = 0; i < 9; i++)
+        for (var i = 0; i < CellCount; i++)
         {
             if (cells[i].IsTeam(team))
             {
@@ -128,7 +128,7 @@ public class Playground : MonoBehaviour
 
     private void VerifyPlayground()
     {
-        Assert.IsTrue(cells.Length == 9, $"The {nameof(cells)} must contain exactly 9 cells.");
+        Assert.AreEqual(cells.Length, CellCount, $"The {nameof(cells)} must contain exactly {CellCount} cells.");
         
         for (var i = 0; i < cells.Length; i++)
         {
@@ -136,7 +136,7 @@ public class Playground : MonoBehaviour
         }
     }
 
-    private bool CanWinAtCell(int cell, int playgroundMask)
+    private static bool CanWinAtCell(int cell, int playgroundMask)
     {
         var moveMask = 1 << cell;
         
