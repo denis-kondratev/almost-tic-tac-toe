@@ -10,14 +10,12 @@ public abstract class PlayerAgent : Agent
     [SerializeField] protected Playground playground;
     [SerializeField] protected Player player;
     [SerializeField] protected Player rival;
-    [SerializeField] private float defaultMoveReward = -0.02f;
-    [SerializeField] private float winReward = 1f;
-    [SerializeField] private float loseReward = -0.2f;
-    [SerializeField] private float drawReward = 0.5f;
-    [SerializeField] private float missedWinReward = -0.2f;
     
     protected Move _lastHeuristicMove;
     private BehaviorParameters _parameters;
+    private int _moveCount;
+    private const int MinMoveToWin = 3;
+    private const int MinMoveToLost = 2;
     
     private bool IsHeuristic => _parameters.BehaviorType == BehaviorType.HeuristicOnly;
     
@@ -47,6 +45,11 @@ public abstract class PlayerAgent : Agent
         player.MadeMove -= OnPlayerMadeMove;
     }
 
+    public override void OnEpisodeBegin()
+    {
+        _moveCount = 0;
+    }
+
     private void OnPlayerMadeMove(Move move)
     {
         _lastHeuristicMove = move;
@@ -63,15 +66,37 @@ public abstract class PlayerAgent : Agent
                 RequestDecision();
                 break;
             case PlayerState.Win:
-                EndEpisode(winReward);
+                EndEpisode(GetWinReward());
                 break;
             case PlayerState.Lose:
-                EndEpisode(loseReward);
+                EndEpisode(GetLossReward());
                 break;
             case PlayerState.Draw:
-                EndEpisode(drawReward);
+                EndEpisode(GetDrawReward());
                 break;
         }
+    }
+
+    private float GetDrawReward()
+    {
+        return 0;
+    }
+
+    private float GetLossReward()
+    {
+        return GetEpisodeDuration(true) / 2 - 1;
+    }
+
+    private float GetWinReward()
+    {
+        return 1 - GetEpisodeDuration(false) / 2;
+    }
+    
+    private float GetEpisodeDuration(bool isLost)
+    {
+        Assert.IsTrue(_moveCount <= Player.PieceCount, $"Move count {_moveCount} is greater than piece count {Player.PieceCount}.");
+        var monMove = isLost ? MinMoveToLost : MinMoveToWin;
+        return (float)(_moveCount - monMove) / (Player.PieceCount - monMove);
     }
 
     private void EndEpisode(float reward)
@@ -86,49 +111,29 @@ public abstract class PlayerAgent : Agent
     {
         try
         {
+            _moveCount++;
             var move = ActionToMove(actions);
-            
-            AddReward(GetRewardForMove(move));
             var hasMoved = IsHeuristic || await player.TryMakeMoveWithTranslation(move);
 
             if (destroyCancellationToken.IsCancellationRequested)
             {
                 return;
             }
-        
+
             if (!hasMoved)
             {
                 Debug.LogError($"Invalid move. Piece: {move.Piece}, Cell: {move.Cell}. Player: {player.name}.");
             }
         }
-        catch (OperationCanceledException) { }
+        catch (OperationCanceledException)
+        {
+        }
         catch (Exception e)
         {
             Debug.LogError(e);
         }
     }
 
-    private float GetRewardForMove(Move move)
-    {
-        if (IsHeuristic)
-        {
-            return defaultMoveReward;
-        }
-
-        var minPiece = Math.Min(move.Piece, player.GetMinPiece());
-        Assert.IsTrue(minPiece >= 0, $"Player '{player.name}' has no piece.");
-        
-        return HasMissedWin(move, minPiece) ? missedWinReward : defaultMoveReward;
-    }
-    
-    private bool HasMissedWin(Move move, int minPiece)
-    {
-        var playgroundMask = playground.GetMask(player.Team);
-        
-        return !playground.IsWinningMove(move, playgroundMask) 
-               && playground.HasWinningMove(playgroundMask, minPiece);
-    }
-    
     protected abstract void SetupBrainParameters (BrainParameters parameters);
     
 #if UNITY_EDITOR
