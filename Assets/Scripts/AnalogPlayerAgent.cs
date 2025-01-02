@@ -20,8 +20,8 @@ public class AnalogPlayerAgent : PlayerAgent
             }
             
             var sign = piece.Team == player.Team ? 1 : -1;
-            var value = sign * (piece ? (piece.Number + 1f) / Player.PieceCount : 0);
-            sensor.AddObservation(value);
+            var amount = (Player.PieceCount - piece.Number) / Player.PieceCount;
+            sensor.AddObservation(sign * amount);
         }
         
         for (var i = 0; i < Player.PieceCount; i++)
