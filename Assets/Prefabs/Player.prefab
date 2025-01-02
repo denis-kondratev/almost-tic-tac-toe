@@ -74,7 +74,7 @@ MonoBehaviour:
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: PlayerX
+  m_BehaviorName: Analog Player
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -99,8 +99,3 @@ MonoBehaviour:
   playground: {fileID: 0}
   player: {fileID: 7905706640281636354}
   rival: {fileID: 0}
-  defaultMoveReward: -0.02
-  winReward: 1
-  loseReward: -0.2
-  drawReward: 0.5
-  missedWinReward: -0.2
