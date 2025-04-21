@@ -26,3 +26,21 @@ Covered pieces can re-emerge later, so bluffing and memory play a key role!
 This project uses Unity ML-Agents to train neural networks to play the game effectively, learning strategies beyond brute-force.
 
 ---
+
+### 🕹️ How to Play
+
+By default, the **red player** is controlled by a **simple trained model**, while the **blue player** can be played **manually** by dragging pieces with the mouse.
+
+If you'd like the AI to control **both players**, follow these steps:
+
+1. Select the `BluePlayer` object in the Unity scene.
+2. Assign a trained model to its **Behavior Parameters** component (as shown in the screenshot).
+3. Enable the **Discrete Player Agent** component.
+![add-blue-bot.png](add-blue-bot.png)
+Enjoy the game and feel free to explore the code!
+
+---
+
+### 💬 Notes
+
+At the moment, I haven't spent much time optimizing the training process — just enough to make the red-side AI functional. If you have ideas on how to **train the model more effectively**, feel free to share! I'd really appreciate any insights. 🙂
