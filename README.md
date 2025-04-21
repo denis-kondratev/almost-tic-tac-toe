@@ -1,20 +1,28 @@
-# Almost Tic-Tac-Toe with Unity and ML Agents
+# Gobblet Gobblers in Unity with ML-Agents
 
-Implementation of the **Almost Tic-Tac-Toe** board game in Unity using
-ML-Agents for training an AI to play the game.
+A Unity implementation of the classic strategy game **Gobblet Gobblers**, enhanced with **ML-Agents** to train an AI capable of playing competitively.
 
 ![tic-tac-toe.gif](tic-tac-toe.gif)
 
-## Game Rules
+## Game Overview
 
-The game is played on a **3x3 grid**, and the rules are similar to standard
-Tic-Tac-Toe but with one important difference:  
-each player has **7 pieces of different sizes**, resembling a nested doll
-(matryoshka). Smaller pieces can be covered by larger ones.
+Gobblet Gobblers is a twist on traditional Tic-Tac-Toe. Played on a **3x3 grid**, it adds strategic depth through the use of **nested pieces** of varying sizes — think *matryoshka dolls*.
 
-On their turn, a player can:
-- Place a piece on an empty cell.
-- Cover their own or the opponent's piece if the size of the piece allows it.
+Each player controls **7 stackable pieces**, from small to large.
 
-The player who first lines up their pieces in a row (horizontally, 
-vertically, or diagonally) wins, just like in the standard Tic-Tac-Toe game.
+### Rules of the Game
+
+- On their turn, a player can:
+  - **Place** a piece on an empty cell.
+  - **Cover** any existing piece (even an opponent's) with a **larger** one.
+- A player **wins** by aligning **three visible pieces** of their own in a straight line — horizontally, vertically, or diagonally.
+
+Covered pieces can re-emerge later, so bluffing and memory play a key role!
+
+---
+
+### 🤖 AI Training with ML-Agents
+
+This project uses Unity ML-Agents to train neural networks to play the game effectively, learning strategies beyond brute-force.
+
+---
