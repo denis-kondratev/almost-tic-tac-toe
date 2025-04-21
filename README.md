@@ -2,7 +2,7 @@
 
 A Unity implementation of the classic strategy game **Gobblet Gobblers**, enhanced with **ML-Agents** to train an AI capable of playing competitively.
 
-![tic-tac-toe.gif](tic-tac-toe.gif)
+![gobblet-gobblers.gif](gobblet-gobblers.gif)
 
 ## Game Overview
 
