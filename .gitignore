@@ -75,5 +75,3 @@ crashlytics-build.properties
 .python-version
 /.venv/
 /results/
-/Assets/ML-Agents/
-/Assets/ML-Agents.meta
