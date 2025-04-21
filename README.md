@@ -1,4 +1,4 @@
-# Gobblet Gobblers in Unity with ML-Agents
+# Gobblet Gobblers implemented in Unity 6 with ML-Agents
 
 A Unity implementation of the classic strategy game **Gobblet Gobblers**, enhanced with **ML-Agents** to train an AI capable of playing competitively.
 
